@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import {
   FlatList,
@@ -12,7 +11,8 @@ import {
 } from "react-native";
 import { TodoCard } from "../components/TodoCard";
 import { UseTodosResult } from "../hooks/useTodos";
-import { colors } from "../constants/colors";
+import { useTheme } from "../theme/ThemeContext";
+import { ThemeColors } from "../theme/theme";
 
 type HomeScreenProps = {
   todosApi: UseTodosResult;
@@ -20,6 +20,9 @@ type HomeScreenProps = {
 
 export function HomeScreen({ todosApi }: HomeScreenProps) {
   const [todoText, setTodoText] = useState("");
+
+  const { colors } = useTheme();
+  const styles = createStyles(colors);
 
   async function handleAddTodo() {
     await todosApi.addTodo(todoText);
@@ -82,71 +85,79 @@ export function HomeScreen({ todosApi }: HomeScreenProps) {
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 20,
-  },
-  header: {
-    marginTop: 20,
-    marginBottom: 20,
-  },
-  appName: {
-    color: colors.text,
-    fontSize: 36,
-    fontWeight: "800",
-  },
-  subtitle: {
-    color: colors.textMuted,
-    fontSize: 16,
-    marginTop: 6,
-  },
-  progressCard: {
-    backgroundColor: colors.surface,
-    padding: 16,
-    borderRadius: 18,
-    marginBottom: 20,
-  },
-  progressText: {
-    color: colors.text,
-    fontSize: 16,
-    fontWeight: "600",
-  },
-  inputContainer: {
-    flexDirection: "row",
-    gap: 12,
-    marginBottom: 20,
-  },
-  input: {
-    flex: 1,
-    backgroundColor: colors.surface,
-    color: colors.text,
-    paddingHorizontal: 16,
-    paddingVertical: 14,
-    borderRadius: 16,
-    fontSize: 16,
-  },
-  addButton: {
-    width: 54,
-    height: 54,
-    borderRadius: 18,
-    backgroundColor: colors.primary,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  addButtonText: {
-    color: colors.text,
-    fontSize: 30,
-    fontWeight: "700",
-    marginTop: -2,
-  },
-  listContent: {
-    paddingBottom: 30,
-  },
-  emptyText: {
-    color: colors.textDisabled,
-    textAlign: "center",
-    marginTop: 40,
-    fontSize: 15,
-  },
-});
+function createStyles(colors: ThemeColors) {
+  return StyleSheet.create({
+    container: {
+      flex: 1,
+      padding: 20,
+      backgroundColor: colors.background,
+    },
+    header: {
+      marginTop: 20,
+      marginBottom: 20,
+      paddingRight: 54,
+    },
+    appName: {
+      color: colors.text,
+      fontSize: 36,
+      fontWeight: "800",
+    },
+    subtitle: {
+      color: colors.textMuted,
+      fontSize: 16,
+      marginTop: 6,
+    },
+    progressCard: {
+      backgroundColor: colors.surface,
+      borderWidth: 1,
+      borderColor: colors.border,
+      padding: 16,
+      borderRadius: 18,
+      marginBottom: 20,
+    },
+    progressText: {
+      color: colors.text,
+      fontSize: 16,
+      fontWeight: "600",
+    },
+    inputContainer: {
+      flexDirection: "row",
+      gap: 12,
+      marginBottom: 20,
+    },
+    input: {
+      flex: 1,
+      backgroundColor: colors.surface,
+      borderWidth: 1,
+      borderColor: colors.border,
+      color: colors.text,
+      paddingHorizontal: 16,
+      paddingVertical: 14,
+      borderRadius: 16,
+      fontSize: 16,
+    },
+    addButton: {
+      width: 54,
+      height: 54,
+      borderRadius: 18,
+      backgroundColor: colors.primary,
+      alignItems: "center",
+      justifyContent: "center",
+    },
+    addButtonText: {
+      color: "#ffffff",
+      fontSize: 30,
+      fontWeight: "700",
+      marginTop: -2,
+    },
+    listContent: {
+      paddingBottom: 30,
+    },
+    emptyText: {
+      color: colors.textDisabled,
+      textAlign: "center",
+      marginTop: 40,
+      fontSize: 15,
+    },
+  });
+}

@@ -1,6 +1,14 @@
-import { Pressable, ScrollView, StyleSheet, Switch, Text, View } from "react-native";
 import { useState } from "react";
-import { colors } from "../constants/colors";
+import {
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Switch,
+  Text,
+  View,
+} from "react-native";
+import { useTheme } from "../theme/ThemeContext";
+import { ThemeColors } from "../theme/theme";
 
 type SettingsScreenProps = {
   onClose: () => void;
@@ -10,6 +18,11 @@ export function SettingsScreen({ onClose }: SettingsScreenProps) {
   const [dailyReminderEnabled, setDailyReminderEnabled] = useState(false);
   const [dopamineModeEnabled, setDopamineModeEnabled] = useState(true);
 
+  const { colors, themeName, setThemeName } = useTheme();
+  const styles = createStyles(colors);
+
+  const isDarkTheme = themeName === "dark";
+
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
       <View style={styles.header}>
@@ -17,9 +30,29 @@ export function SettingsScreen({ onClose }: SettingsScreenProps) {
           <Text style={styles.backButtonText}>←</Text>
         </Pressable>
 
-        <View>
+        <View style={styles.headerTextContainer}>
           <Text style={styles.title}>Einstellungen</Text>
           <Text style={styles.subtitle}>Passe Dopado an dich an.</Text>
+        </View>
+      </View>
+
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>Darstellung</Text>
+
+        <View style={styles.settingRow}>
+          <View style={styles.settingTextContainer}>
+            <Text style={styles.settingTitle}>Dunkles Theme</Text>
+            <Text style={styles.settingDescription}>
+              Wechsle zwischen hellem und dunklem Design.
+            </Text>
+          </View>
+
+          <Switch
+            value={isDarkTheme}
+            onValueChange={(value) =>
+              void setThemeName(value ? "dark" : "light")
+            }
+          />
         </View>
       </View>
 
@@ -61,7 +94,8 @@ export function SettingsScreen({ onClose }: SettingsScreenProps) {
         <View style={styles.infoCard}>
           <Text style={styles.infoTitle}>Lokale Speicherung</Text>
           <Text style={styles.infoText}>
-            Deine Todos werden aktuell lokal auf deinem Gerät gespeichert.
+            Deine Todos und Einstellungen werden aktuell lokal auf deinem Gerät
+            gespeichert.
           </Text>
         </View>
 
@@ -74,94 +108,105 @@ export function SettingsScreen({ onClose }: SettingsScreenProps) {
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.background,
-  },
-  content: {
-    padding: 20,
-    paddingBottom: 100,
-  },
-  header: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 14,
-    marginTop: 20,
-    marginBottom: 28,
-  },
-  backButton: {
-    width: 44,
-    height: 44,
-    borderRadius: 14,
-    backgroundColor: colors.surface,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  backButtonText: {
-    color: colors.text,
-    fontSize: 28,
-    fontWeight: "700",
-    marginTop: -2,
-  },
-  title: {
-    color: colors.text,
-    fontSize: 32,
-    fontWeight: "800",
-  },
-  subtitle: {
-    color: colors.textMuted,
-    fontSize: 15,
-    marginTop: 4,
-  },
-  section: {
-    marginBottom: 26,
-  },
-  sectionTitle: {
-    color: colors.text,
-    fontSize: 20,
-    fontWeight: "800",
-    marginBottom: 12,
-  },
-  settingRow: {
-    backgroundColor: colors.surface,
-    padding: 16,
-    borderRadius: 18,
-    marginBottom: 12,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    gap: 14,
-  },
-  settingTextContainer: {
-    flex: 1,
-  },
-  settingTitle: {
-    color: colors.text,
-    fontSize: 16,
-    fontWeight: "700",
-    marginBottom: 4,
-  },
-  settingDescription: {
-    color: colors.textMuted,
-    fontSize: 14,
-    lineHeight: 19,
-  },
-  infoCard: {
-    backgroundColor: colors.surface,
-    padding: 16,
-    borderRadius: 18,
-    marginBottom: 12,
-  },
-  infoTitle: {
-    color: colors.text,
-    fontSize: 16,
-    fontWeight: "700",
-    marginBottom: 4,
-  },
-  infoText: {
-    color: colors.textMuted,
-    fontSize: 14,
-    lineHeight: 19,
-  },
-});
+function createStyles(colors: ThemeColors) {
+  return StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: colors.background,
+    },
+    content: {
+      padding: 20,
+      paddingBottom: 100,
+    },
+    header: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 14,
+      marginTop: 20,
+      marginBottom: 28,
+    },
+    headerTextContainer: {
+      flex: 1,
+    },
+    backButton: {
+      width: 44,
+      height: 44,
+      borderRadius: 14,
+      backgroundColor: colors.surface,
+      borderWidth: 1,
+      borderColor: colors.border,
+      alignItems: "center",
+      justifyContent: "center",
+    },
+    backButtonText: {
+      color: colors.text,
+      fontSize: 28,
+      fontWeight: "700",
+      marginTop: -2,
+    },
+    title: {
+      color: colors.text,
+      fontSize: 32,
+      fontWeight: "800",
+    },
+    subtitle: {
+      color: colors.textMuted,
+      fontSize: 15,
+      marginTop: 4,
+    },
+    section: {
+      marginBottom: 26,
+    },
+    sectionTitle: {
+      color: colors.text,
+      fontSize: 20,
+      fontWeight: "800",
+      marginBottom: 12,
+    },
+    settingRow: {
+      backgroundColor: colors.surface,
+      borderWidth: 1,
+      borderColor: colors.border,
+      padding: 16,
+      borderRadius: 18,
+      marginBottom: 12,
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "space-between",
+      gap: 14,
+    },
+    settingTextContainer: {
+      flex: 1,
+    },
+    settingTitle: {
+      color: colors.text,
+      fontSize: 16,
+      fontWeight: "700",
+      marginBottom: 4,
+    },
+    settingDescription: {
+      color: colors.textMuted,
+      fontSize: 14,
+      lineHeight: 19,
+    },
+    infoCard: {
+      backgroundColor: colors.surface,
+      borderWidth: 1,
+      borderColor: colors.border,
+      padding: 16,
+      borderRadius: 18,
+      marginBottom: 12,
+    },
+    infoTitle: {
+      color: colors.text,
+      fontSize: 16,
+      fontWeight: "700",
+      marginBottom: 4,
+    },
+    infoText: {
+      color: colors.textMuted,
+      fontSize: 14,
+      lineHeight: 19,
+    },
+  });
+}

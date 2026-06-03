@@ -1,8 +1,8 @@
-
 import { ScrollView, StyleSheet, Text, View } from "react-native";
 import { UseTodosResult } from "../hooks/useTodos";
 import { Todo } from "../types/todo";
-import { colors } from "../constants/colors";
+import { useTheme } from "../theme/ThemeContext";
+import { ThemeColors } from "../theme/theme";
 import { formatDisplayDate } from "../services/dateService";
 
 type CalendarScreenProps = {
@@ -21,13 +21,18 @@ function groupTodosByDate(todos: Todo[]) {
 }
 
 export function CalendarScreen({ todosApi }: CalendarScreenProps) {
+  const { colors } = useTheme();
+  const styles = createStyles(colors);
+
   const groupedTodos = groupTodosByDate(todosApi.allTodos);
   const dates = Object.keys(groupedTodos).sort((a, b) => b.localeCompare(a));
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
       <Text style={styles.title}>Kalender</Text>
-      <Text style={styles.subtitle}>Hier siehst du deine Aufgaben nach Tagen.</Text>
+      <Text style={styles.subtitle}>
+        Hier siehst du deine Aufgaben nach Tagen.
+      </Text>
 
       {dates.length === 0 && (
         <Text style={styles.emptyText}>Noch keine gespeicherten Tage.</Text>
@@ -40,6 +45,7 @@ export function CalendarScreen({ todosApi }: CalendarScreenProps) {
         return (
           <View key={date} style={styles.dayCard}>
             <Text style={styles.date}>{formatDisplayDate(date)}</Text>
+
             <Text style={styles.summary}>
               {completed} von {todos.length} erledigt
             </Text>
@@ -59,55 +65,60 @@ export function CalendarScreen({ todosApi }: CalendarScreenProps) {
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  content: {
-    padding: 20,
-    paddingBottom: 100,
-  },
-  title: {
-    color: colors.text,
-    fontSize: 32,
-    fontWeight: "800",
-    marginTop: 20,
-  },
-  subtitle: {
-    color: colors.textMuted,
-    fontSize: 16,
-    marginTop: 6,
-    marginBottom: 20,
-  },
-  emptyText: {
-    color: colors.textDisabled,
-    textAlign: "center",
-    marginTop: 40,
-    fontSize: 15,
-  },
-  dayCard: {
-    backgroundColor: colors.surface,
-    padding: 16,
-    borderRadius: 18,
-    marginBottom: 14,
-  },
-  date: {
-    color: colors.text,
-    fontSize: 18,
-    fontWeight: "700",
-    marginBottom: 4,
-  },
-  summary: {
-    color: colors.textMuted,
-    marginBottom: 12,
-  },
-  todoText: {
-    color: colors.text,
-    fontSize: 15,
-    marginBottom: 6,
-  },
-  todoDone: {
-    color: colors.textDisabled,
-    textDecorationLine: "line-through",
-  },
-});
+function createStyles(colors: ThemeColors) {
+  return StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: colors.background,
+    },
+    content: {
+      padding: 20,
+      paddingBottom: 100,
+    },
+    title: {
+      color: colors.text,
+      fontSize: 32,
+      fontWeight: "800",
+      marginTop: 20,
+    },
+    subtitle: {
+      color: colors.textMuted,
+      fontSize: 16,
+      marginTop: 6,
+      marginBottom: 20,
+    },
+    emptyText: {
+      color: colors.textDisabled,
+      textAlign: "center",
+      marginTop: 40,
+      fontSize: 15,
+    },
+    dayCard: {
+      backgroundColor: colors.surface,
+      borderWidth: 1,
+      borderColor: colors.border,
+      padding: 16,
+      borderRadius: 18,
+      marginBottom: 14,
+    },
+    date: {
+      color: colors.text,
+      fontSize: 18,
+      fontWeight: "700",
+      marginBottom: 4,
+    },
+    summary: {
+      color: colors.textMuted,
+      marginBottom: 12,
+    },
+    todoText: {
+      color: colors.text,
+      fontSize: 15,
+      marginBottom: 6,
+    },
+    todoDone: {
+      color: colors.textDisabled,
+      textDecorationLine: "line-through",
+    },
+  });
+}
