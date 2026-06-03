@@ -7,5 +7,5 @@ export type Todo = {
     createdAt: string;
     completedAt: string | null;
     deletedAt: string | null;
-    idDone: boolean;
+    isDone: boolean;
 };
