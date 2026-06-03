@@ -1,12 +1,14 @@
-import { ScrollView, StyleSheet, Text, View } from "react-native";
+import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { UseTodosResult } from "../hooks/useTodos";
 import { Todo } from "../types/todo";
 import { useTheme } from "../theme/ThemeContext";
 import { ThemeColors } from "../theme/theme";
 import { formatDisplayDate } from "../services/dateService";
+import { useAppSettings } from "../settings/AppSettingsContext";
 
 type CalendarScreenProps = {
   todosApi: UseTodosResult;
+  onOpenDay: (dateKey: string) => void;
 };
 
 function groupTodosByDate(todos: Todo[]) {
@@ -20,9 +22,11 @@ function groupTodosByDate(todos: Todo[]) {
   }, {});
 }
 
-export function CalendarScreen({ todosApi }: CalendarScreenProps) {
+export function CalendarScreen({ todosApi, onOpenDay }: CalendarScreenProps) {
   const { colors } = useTheme();
   const styles = createStyles(colors);
+
+  const { dailyDopamineGoal, dopaminePointsPerTodo } = useAppSettings();
 
   const groupedTodos = groupTodosByDate(todosApi.allTodos);
   const dates = Object.keys(groupedTodos).sort((a, b) => b.localeCompare(a));
@@ -31,7 +35,7 @@ export function CalendarScreen({ todosApi }: CalendarScreenProps) {
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
       <Text style={styles.title}>Kalender</Text>
       <Text style={styles.subtitle}>
-        Hier siehst du deine Aufgaben nach Tagen.
+        Tippe auf einen Tag, um die Details zu sehen.
       </Text>
 
       {dates.length === 0 && (
@@ -41,24 +45,54 @@ export function CalendarScreen({ todosApi }: CalendarScreenProps) {
       {dates.map((date) => {
         const todos = groupedTodos[date];
         const completed = todos.filter((todo) => todo.isDone).length;
+        const dopaminePoints = completed * dopaminePointsPerTodo;
+        const goalReached = dopaminePoints >= dailyDopamineGoal;
+        const remainingPoints = Math.max(dailyDopamineGoal - dopaminePoints, 0);
 
         return (
-          <View key={date} style={styles.dayCard}>
-            <Text style={styles.date}>{formatDisplayDate(date)}</Text>
+          <Pressable
+            key={date}
+            style={[
+              styles.dayCard,
+              goalReached ? styles.dayCardSuccess : styles.dayCardDanger,
+            ]}
+            onPress={() => onOpenDay(date)}
+          >
+            <View style={styles.dayHeader}>
+              <View style={styles.dayTextContainer}>
+                <Text style={styles.date}>{formatDisplayDate(date)}</Text>
+                <Text style={styles.summary}>
+                  {completed} von {todos.length} Todos erledigt
+                </Text>
+              </View>
 
-            <Text style={styles.summary}>
-              {completed} von {todos.length} erledigt
+              <View style={styles.statusBadge}>
+                <Text style={styles.statusBadgeText}>
+                  {goalReached ? "DONE" : "OFFEN"}
+                </Text>
+              </View>
+            </View>
+
+            <View style={styles.progressBackground}>
+              <View
+                style={[
+                  styles.progressFill,
+                  {
+                    width: `${Math.min(
+                      Math.round((dopaminePoints / dailyDopamineGoal) * 100),
+                      100
+                    )}%`,
+                  },
+                ]}
+              />
+            </View>
+
+            <Text style={styles.pointsText}>
+              {goalReached
+                ? `${dopaminePoints} / ${dailyDopamineGoal} DP · Ziel erreicht`
+                : `${dopaminePoints} / ${dailyDopamineGoal} DP · noch ${remainingPoints} DP`}
             </Text>
-
-            {todos.map((todo) => (
-              <Text
-                key={todo.id}
-                style={[styles.todoText, todo.isDone && styles.todoDone]}
-              >
-                {todo.isDone ? "✓" : "○"} {todo.title}
-              </Text>
-            ))}
-          </View>
+          </Pressable>
         );
       })}
     </ScrollView>
@@ -78,7 +112,7 @@ function createStyles(colors: ThemeColors) {
     title: {
       color: colors.text,
       fontSize: 32,
-      fontWeight: "800",
+      fontWeight: "900",
       marginTop: 20,
     },
     subtitle: {
@@ -94,31 +128,67 @@ function createStyles(colors: ThemeColors) {
       fontSize: 15,
     },
     dayCard: {
-      backgroundColor: colors.surface,
-      borderWidth: 1,
-      borderColor: colors.border,
       padding: 16,
-      borderRadius: 18,
+      borderRadius: 22,
       marginBottom: 14,
     },
+    dayCardSuccess: {
+      backgroundColor: colors.success,
+    },
+    dayCardDanger: {
+      backgroundColor: colors.danger,
+    },
+    dayHeader: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      alignItems: "flex-start",
+      gap: 12,
+      marginBottom: 14,
+    },
+    dayTextContainer: {
+      flex: 1,
+    },
     date: {
-      color: colors.text,
+      color: "#ffffff",
       fontSize: 18,
-      fontWeight: "700",
+      fontWeight: "900",
       marginBottom: 4,
     },
     summary: {
-      color: colors.textMuted,
-      marginBottom: 12,
+      color: "#ffffff",
+      fontSize: 14,
+      fontWeight: "700",
+      opacity: 0.9,
     },
-    todoText: {
-      color: colors.text,
-      fontSize: 15,
-      marginBottom: 6,
+    statusBadge: {
+      backgroundColor: "rgba(255, 255, 255, 0.22)",
+      paddingHorizontal: 10,
+      paddingVertical: 6,
+      borderRadius: 999,
     },
-    todoDone: {
-      color: colors.textDisabled,
-      textDecorationLine: "line-through",
+    statusBadgeText: {
+      color: "#ffffff",
+      fontSize: 11,
+      fontWeight: "900",
+      letterSpacing: 0.8,
+    },
+    progressBackground: {
+      height: 10,
+      backgroundColor: "rgba(255, 255, 255, 0.25)",
+      borderRadius: 999,
+      overflow: "hidden",
+      marginBottom: 10,
+    },
+    progressFill: {
+      height: "100%",
+      backgroundColor: "#ffffff",
+      borderRadius: 999,
+    },
+    pointsText: {
+      color: "#ffffff",
+      fontSize: 13,
+      fontWeight: "700",
+      opacity: 0.95,
     },
   });
 }

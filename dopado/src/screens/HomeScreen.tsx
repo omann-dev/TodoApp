@@ -10,10 +10,12 @@ import {
   View,
 } from "react-native";
 import { TodoCard } from "../components/TodoCard";
-import { BrandText } from "../components/BrandText";
+import { DopamineBar } from "../components/DopamineBar";
 import { UseTodosResult } from "../hooks/useTodos";
 import { useTheme } from "../theme/ThemeContext";
 import { ThemeColors } from "../theme/theme";
+import { useAppSettings } from "../settings/AppSettingsContext";
+import { BrandText } from "../components/BrandText";
 
 type HomeScreenProps = {
   todosApi: UseTodosResult;
@@ -24,6 +26,11 @@ export function HomeScreen({ todosApi }: HomeScreenProps) {
 
   const { colors } = useTheme();
   const styles = createStyles(colors);
+
+  const { dailyDopamineGoal, dopaminePointsPerTodo } = useAppSettings();
+
+  const dopaminePoints =
+    todosApi.completedTodayTodos * dopaminePointsPerTodo;
 
   async function handleAddTodo() {
     await todosApi.addTodo(todoText);
@@ -39,6 +46,8 @@ export function HomeScreen({ todosApi }: HomeScreenProps) {
         <BrandText size={42} />
         <Text style={styles.subtitle}>Mach kleine Aufgaben sichtbar.</Text>
       </View>
+
+      <DopamineBar points={dopaminePoints} goal={dailyDopamineGoal} />
 
       <View style={styles.progressCard}>
         <Text style={styles.progressText}>
@@ -97,11 +106,6 @@ function createStyles(colors: ThemeColors) {
       marginTop: 20,
       marginBottom: 20,
       paddingRight: 54,
-    },
-    appName: {
-      color: colors.text,
-      fontSize: 36,
-      fontWeight: "800",
     },
     subtitle: {
       color: colors.textMuted,

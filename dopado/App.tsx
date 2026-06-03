@@ -3,19 +3,23 @@ import { Pressable, SafeAreaView, StyleSheet, Text, View } from "react-native";
 import { StatusBar } from "expo-status-bar";
 import { HomeScreen } from "./src/screens/HomeScreen";
 import { CalendarScreen } from "./src/screens/CalendarScreen";
+import { CalendarDayDetailScreen } from "./src/screens/CalendarDayDetailScreen";
 import { StatsScreen } from "./src/screens/StatsScreen";
 import { SettingsScreen } from "./src/screens/SettingsScreen";
 import { useTodos } from "./src/hooks/useTodos";
 import { ThemeProvider, useTheme } from "./src/theme/ThemeContext";
 import { ThemeColors } from "./src/theme/theme";
+import { AppSettingsProvider } from "./src/settings/AppSettingsContext";
 
 type MainScreen = "home" | "calendar" | "stats";
-type ActiveScreen = MainScreen | "settings";
+type ActiveScreen = MainScreen | "settings" | "calendarDayDetail";
 
 export default function App() {
   return (
     <ThemeProvider>
-      <AppContent />
+      <AppSettingsProvider>
+        <AppContent />
+      </AppSettingsProvider>
     </ThemeProvider>
   );
 }
@@ -23,14 +27,17 @@ export default function App() {
 function AppContent() {
   const [activeScreen, setActiveScreen] = useState<ActiveScreen>("home");
   const [lastMainScreen, setLastMainScreen] = useState<MainScreen>("home");
+  const [selectedCalendarDate, setSelectedCalendarDate] = useState<string | null>(
+    null
+  );
 
   const todosApi = useTodos();
   const { colors } = useTheme();
   const styles = createStyles(colors);
 
   function openSettings() {
-    if (activeScreen !== "settings") {
-      setLastMainScreen(activeScreen as MainScreen);
+    if (activeScreen === "home" || activeScreen === "calendar" || activeScreen === "stats") {
+      setLastMainScreen(activeScreen);
     }
 
     setActiveScreen("settings");
@@ -45,11 +52,29 @@ function AppContent() {
     setActiveScreen(screen);
   }
 
+  function openCalendarDay(dateKey: string) {
+    setSelectedCalendarDate(dateKey);
+    setActiveScreen("calendarDayDetail");
+  }
+
+  function closeCalendarDay() {
+    setSelectedCalendarDate(null);
+    setActiveScreen("calendar");
+  }
+
+  const shouldShowSettingsButton =
+    activeScreen !== "settings" && activeScreen !== "calendarDayDetail";
+
+  const shouldShowTabBar =
+    activeScreen === "home" ||
+    activeScreen === "calendar" ||
+    activeScreen === "stats";
+
   return (
     <SafeAreaView style={styles.safeArea}>
       <StatusBar style={colors.statusBarStyle} />
 
-      {activeScreen !== "settings" && (
+      {shouldShowSettingsButton && (
         <Pressable style={styles.settingsButton} onPress={openSettings}>
           <Text style={styles.settingsButtonText}>⚙</Text>
         </Pressable>
@@ -57,14 +82,27 @@ function AppContent() {
 
       <View style={styles.screenContainer}>
         {activeScreen === "home" && <HomeScreen todosApi={todosApi} />}
-        {activeScreen === "calendar" && <CalendarScreen todosApi={todosApi} />}
+
+        {activeScreen === "calendar" && (
+          <CalendarScreen todosApi={todosApi} onOpenDay={openCalendarDay} />
+        )}
+
         {activeScreen === "stats" && <StatsScreen todosApi={todosApi} />}
+
         {activeScreen === "settings" && (
           <SettingsScreen onClose={closeSettings} />
         )}
+
+        {activeScreen === "calendarDayDetail" && selectedCalendarDate && (
+          <CalendarDayDetailScreen
+            dateKey={selectedCalendarDate}
+            todosApi={todosApi}
+            onBack={closeCalendarDay}
+          />
+        )}
       </View>
 
-      {activeScreen !== "settings" && (
+      {shouldShowTabBar && (
         <View style={styles.tabBar}>
           <TabButton
             label="Heute"
