@@ -16,9 +16,10 @@ export async function runMigrations(): Promise<void> {
       deletedAt TEXT,
       isDone INTEGER NOT NULL DEFAULT 0
     );
-    
+
     CREATE TABLE IF NOT EXISTS settings (
       key TEXT PRIMARY KEY NOT NULL,
       value TEXT NOT NULL
+    );
   `);
 }

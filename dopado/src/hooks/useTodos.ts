@@ -1,4 +1,5 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { AppState } from "react-native";
 import { Todo } from "../types/todo";
 import { runMigrations } from "../database/migrations";
 import {
@@ -15,7 +16,20 @@ export function useTodos() {
   const [allTodos, setAllTodos] = useState<Todo[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  async function refreshTodos() {
+  const hasInitializedDatabase = useRef(false);
+
+  const ensureDatabaseIsReady = useCallback(async () => {
+    if (hasInitializedDatabase.current) {
+      return;
+    }
+
+    await runMigrations();
+    hasInitializedDatabase.current = true;
+  }, []);
+
+  const refreshTodos = useCallback(async () => {
+    await ensureDatabaseIsReady();
+
     const today = getTodayDateKey();
 
     const [loadedTodayTodos, loadedAllTodos] = await Promise.all([
@@ -25,17 +39,18 @@ export function useTodos() {
 
     setTodayTodos(loadedTodayTodos);
     setAllTodos(loadedAllTodos);
-  }
+  }, [ensureDatabaseIsReady]);
 
-  async function initializeTodos() {
+  const initializeTodos = useCallback(async () => {
     try {
       setIsLoading(true);
-      await runMigrations();
       await refreshTodos();
+    } catch (error) {
+      console.error("Fehler beim Laden der Todos:", error);
     } finally {
       setIsLoading(false);
     }
-  }
+  }, [refreshTodos]);
 
   async function addTodo(title: string) {
     const trimmedTitle = title.trim();
@@ -44,23 +59,36 @@ export function useTodos() {
       return;
     }
 
+    await ensureDatabaseIsReady();
     await createTodo(trimmedTitle);
     await refreshTodos();
   }
 
   async function toggleTodo(todo: Todo) {
+    await ensureDatabaseIsReady();
     await toggleTodoInDatabase(todo);
     await refreshTodos();
   }
 
   async function deleteTodo(id: string) {
+    await ensureDatabaseIsReady();
     await softDeleteTodo(id);
     await refreshTodos();
   }
 
   useEffect(() => {
-    initializeTodos();
-  }, []);
+    void initializeTodos();
+
+    const subscription = AppState.addEventListener("change", (nextAppState) => {
+      if (nextAppState === "active") {
+        void refreshTodos();
+      }
+    });
+
+    return () => {
+      subscription.remove();
+    };
+  }, [initializeTodos, refreshTodos]);
 
   const completedTodayTodos = todayTodos.filter((todo) => todo.isDone).length;
   const completedAllTodos = allTodos.filter((todo) => todo.isDone).length;
