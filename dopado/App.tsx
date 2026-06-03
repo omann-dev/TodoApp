@@ -4,44 +4,74 @@ import { StatusBar } from "expo-status-bar";
 import { HomeScreen } from "./src/screens/HomeScreen";
 import { CalendarScreen } from "./src/screens/CalendarScreen";
 import { StatsScreen } from "./src/screens/StatsScreen";
+import { SettingsScreen } from "./src/screens/SettingsScreen";
 import { useTodos } from "./src/hooks/useTodos";
 import { colors } from "./src/constants/colors";
 
-type ActiveScreen = "home" | "calendar" | "stats";
+type MainScreen = "home" | "calendar" | "stats";
+type ActiveScreen = MainScreen | "settings";
 
 export default function App() {
   const [activeScreen, setActiveScreen] = useState<ActiveScreen>("home");
+  const [lastMainScreen, setLastMainScreen] = useState<MainScreen>("home");
+
   const todosApi = useTodos();
+
+  function openSettings() {
+    if (activeScreen !== "settings") {
+      setLastMainScreen(activeScreen as MainScreen);
+    }
+
+    setActiveScreen("settings");
+  }
+
+  function closeSettings() {
+    setActiveScreen(lastMainScreen);
+  }
+
+  function changeMainScreen(screen: MainScreen) {
+    setLastMainScreen(screen);
+    setActiveScreen(screen);
+  }
 
   return (
     <SafeAreaView style={styles.safeArea}>
       <StatusBar style="light" />
 
+      {activeScreen !== "settings" && (
+        <Pressable style={styles.settingsButton} onPress={openSettings}>
+          <Text style={styles.settingsButtonText}>⚙</Text>
+        </Pressable>
+      )}
+
       <View style={styles.screenContainer}>
         {activeScreen === "home" && <HomeScreen todosApi={todosApi} />}
         {activeScreen === "calendar" && <CalendarScreen todosApi={todosApi} />}
         {activeScreen === "stats" && <StatsScreen todosApi={todosApi} />}
+        {activeScreen === "settings" && <SettingsScreen onClose={closeSettings} />}
       </View>
 
-      <View style={styles.tabBar}>
-        <TabButton
-          label="Heute"
-          isActive={activeScreen === "home"}
-          onPress={() => setActiveScreen("home")}
-        />
+      {activeScreen !== "settings" && (
+        <View style={styles.tabBar}>
+          <TabButton
+            label="Heute"
+            isActive={activeScreen === "home"}
+            onPress={() => changeMainScreen("home")}
+          />
 
-        <TabButton
-          label="Kalender"
-          isActive={activeScreen === "calendar"}
-          onPress={() => setActiveScreen("calendar")}
-        />
+          <TabButton
+            label="Kalender"
+            isActive={activeScreen === "calendar"}
+            onPress={() => changeMainScreen("calendar")}
+          />
 
-        <TabButton
-          label="Stats"
-          isActive={activeScreen === "stats"}
-          onPress={() => setActiveScreen("stats")}
-        />
-      </View>
+          <TabButton
+            label="Stats"
+            isActive={activeScreen === "stats"}
+            onPress={() => changeMainScreen("stats")}
+          />
+        </View>
+      )}
     </SafeAreaView>
   );
 }
@@ -72,6 +102,23 @@ const styles = StyleSheet.create({
   },
   screenContainer: {
     flex: 1,
+  },
+  settingsButton: {
+    position: "absolute",
+    top: 54,
+    right: 20,
+    width: 44,
+    height: 44,
+    borderRadius: 14,
+    backgroundColor: colors.surface,
+    alignItems: "center",
+    justifyContent: "center",
+    zIndex: 10,
+  },
+  settingsButtonText: {
+    color: colors.text,
+    fontSize: 24,
+    fontWeight: "700",
   },
   tabBar: {
     flexDirection: "row",
