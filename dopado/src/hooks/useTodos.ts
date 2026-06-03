@@ -52,7 +52,7 @@ export function useTodos() {
     }
   }, [refreshTodos]);
 
-  async function addTodo(title: string) {
+  async function addTodo(title: string, plannedFor?: string) {
     const trimmedTitle = title.trim();
 
     if (trimmedTitle.length === 0) {
@@ -60,7 +60,7 @@ export function useTodos() {
     }
 
     await ensureDatabaseIsReady();
-    await createTodo(trimmedTitle);
+    await createTodo(trimmedTitle, plannedFor);
     await refreshTodos();
   }
 
