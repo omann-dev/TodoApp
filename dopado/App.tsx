@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Pressable, SafeAreaView, StyleSheet, Text, View } from "react-native";
 import { StatusBar } from "expo-status-bar";
 import { HomeScreen } from "./src/screens/HomeScreen";
@@ -6,13 +6,19 @@ import { CalendarScreen } from "./src/screens/CalendarScreen";
 import { CalendarDayDetailScreen } from "./src/screens/CalendarDayDetailScreen";
 import { StatsScreen } from "./src/screens/StatsScreen";
 import { SettingsScreen } from "./src/screens/SettingsScreen";
+import { StartupScreen } from "./src/screens/StartupScreen";
 import { useTodos } from "./src/hooks/useTodos";
 import { ThemeProvider, useTheme } from "./src/theme/ThemeContext";
 import { ThemeColors } from "./src/theme/theme";
-import { AppSettingsProvider } from "./src/settings/AppSettingsContext";
+import {
+  AppSettingsProvider,
+  useAppSettings,
+} from "./src/settings/AppSettingsContext";
 
 type MainScreen = "home" | "calendar" | "stats";
 type ActiveScreen = MainScreen | "settings" | "calendarDayDetail";
+
+const STARTUP_SCREEN_DURATION_IN_MS = 2200;
 
 export default function App() {
   return (
@@ -31,12 +37,40 @@ function AppContent() {
     null
   );
 
+  const [hasStartupTimePassed, setHasStartupTimePassed] = useState(false);
+
   const todosApi = useTodos();
+  const { isSettingsLoading } = useAppSettings();
+
   const { colors } = useTheme();
   const styles = createStyles(colors);
 
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setHasStartupTimePassed(true);
+    }, STARTUP_SCREEN_DURATION_IN_MS);
+
+    return () => clearTimeout(timer);
+  }, []);
+
+  const shouldShowStartupScreen =
+    !hasStartupTimePassed || todosApi.isLoading || isSettingsLoading;
+
+  if (shouldShowStartupScreen) {
+    return (
+      <SafeAreaView style={styles.safeArea}>
+        <StatusBar style={colors.statusBarStyle} />
+        <StartupScreen />
+      </SafeAreaView>
+    );
+  }
+
   function openSettings() {
-    if (activeScreen === "home" || activeScreen === "calendar" || activeScreen === "stats") {
+    if (
+      activeScreen === "home" ||
+      activeScreen === "calendar" ||
+      activeScreen === "stats"
+    ) {
       setLastMainScreen(activeScreen);
     }
 
