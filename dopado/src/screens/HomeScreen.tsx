@@ -40,7 +40,7 @@ export function HomeScreen({ todosApi }: HomeScreenProps) {
   const isPlannedDateValid = isValidDateKey(plannedForDate);
 
   async function handleAddTodo() {
-    if (!isPlannedDateValid) {
+    if (!isPlannedDateValid || todoText.trim().length === 0) {
       return;
     }
 
@@ -57,116 +57,120 @@ export function HomeScreen({ todosApi }: HomeScreenProps) {
       style={styles.container}
       behavior={Platform.OS === "ios" ? "padding" : undefined}
     >
-      <View style={styles.header}>
-        <BrandText size={42} />
-        <Text style={styles.subtitle}>Mach kleine Aufgaben sichtbar.</Text>
-      </View>
+      <FlatList
+        data={todosApi.todayTodos}
+        keyExtractor={(item) => item.id}
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.listContent}
+        ListHeaderComponent={
+          <View>
+            <View style={styles.header}>
+              <BrandText size={42} />
+              <Text style={styles.subtitle}>Mach kleine Aufgaben sichtbar.</Text>
+            </View>
 
-      <DopamineBar points={dopaminePoints} goal={dailyDopamineGoal} />
+            <DopamineBar points={dopaminePoints} goal={dailyDopamineGoal} />
 
-      <View style={styles.progressCard}>
-        <Text style={styles.progressText}>
-          {todosApi.completedTodayTodos} von {todosApi.todayTodos.length} heute
-          erledigt
-        </Text>
-      </View>
+            <View style={styles.progressCard}>
+              <Text style={styles.progressText}>
+                {todosApi.completedTodayTodos} von {todosApi.todayTodos.length} heute erledigt
+              </Text>
+            </View>
 
-      <View style={styles.createCard}>
-        <Text style={styles.createTitle}>Neue Todo</Text>
+            <View style={styles.createCard}>
+              <Text style={styles.createTitle}>Neue Todo</Text>
 
-        <View style={styles.inputContainer}>
-          <TextInput
-            style={styles.input}
-            placeholder="Neue Aufgabe..."
-            placeholderTextColor={colors.textDisabled}
-            value={todoText}
-            onChangeText={setTodoText}
-            onSubmitEditing={handleAddTodo}
+              <View style={styles.inputContainer}>
+                <TextInput
+                  style={styles.input}
+                  placeholder="Neue Aufgabe..."
+                  placeholderTextColor={colors.textDisabled}
+                  value={todoText}
+                  onChangeText={setTodoText}
+                  onSubmitEditing={handleAddTodo}
+                />
+
+                <Pressable
+                  style={[
+                    styles.addButton,
+                    (!isPlannedDateValid || todoText.trim().length === 0) &&
+                      styles.addButtonDisabled,
+                  ]}
+                  onPress={handleAddTodo}
+                >
+                  <Text style={styles.addButtonText}>+</Text>
+                </Pressable>
+              </View>
+
+              <Text style={styles.dateLabel}>Geplant für</Text>
+
+              <View style={styles.datePresetRow}>
+                <DatePresetButton
+                  label="Heute"
+                  dateKey={getDateKeyWithOffset(0)}
+                  selectedDateKey={plannedForDate}
+                  onPress={() => selectDateByOffset(0)}
+                />
+
+                <DatePresetButton
+                  label="Morgen"
+                  dateKey={getDateKeyWithOffset(1)}
+                  selectedDateKey={plannedForDate}
+                  onPress={() => selectDateByOffset(1)}
+                />
+
+                <DatePresetButton
+                  label="Übermorgen"
+                  dateKey={getDateKeyWithOffset(2)}
+                  selectedDateKey={plannedForDate}
+                  onPress={() => selectDateByOffset(2)}
+                />
+              </View>
+
+              <TextInput
+                style={[
+                  styles.dateInput,
+                  !isPlannedDateValid && styles.dateInputInvalid,
+                ]}
+                value={plannedForDate}
+                onChangeText={setPlannedForDate}
+                placeholder="YYYY-MM-DD"
+                placeholderTextColor={colors.textDisabled}
+              />
+
+              <Text
+                style={[
+                  styles.selectedDateText,
+                  !isPlannedDateValid && styles.selectedDateTextInvalid,
+                ]}
+              >
+                {isPlannedDateValid
+                  ? `Ausgewählt: ${formatShortDisplayDate(plannedForDate)}`
+                  : "Ungültiges Datum. Nutze z. B. 2026-06-03."}
+              </Text>
+            </View>
+
+            <Text style={styles.todayTitle}>Heute</Text>
+
+            {todosApi.isLoading && (
+              <Text style={styles.emptyText}>Lade Todos...</Text>
+            )}
+          </View>
+        }
+        ListEmptyComponent={
+          !todosApi.isLoading ? (
+            <Text style={styles.emptyText}>Noch keine Aufgaben für heute.</Text>
+          ) : null
+        }
+        renderItem={({ item }) => (
+          <TodoCard
+            todo={item}
+            onToggle={todosApi.toggleTodo}
+            onDelete={todosApi.deleteTodo}
           />
-
-          <Pressable
-            style={[
-              styles.addButton,
-              (!isPlannedDateValid || todoText.trim().length === 0) &&
-                styles.addButtonDisabled,
-            ]}
-            onPress={handleAddTodo}
-          >
-            <Text style={styles.addButtonText}>+</Text>
-          </Pressable>
-        </View>
-
-        <Text style={styles.dateLabel}>Geplant für</Text>
-
-        <View style={styles.datePresetRow}>
-          <DatePresetButton
-            label="Heute"
-            dateKey={getDateKeyWithOffset(0)}
-            selectedDateKey={plannedForDate}
-            onPress={() => selectDateByOffset(0)}
-          />
-
-          <DatePresetButton
-            label="Morgen"
-            dateKey={getDateKeyWithOffset(1)}
-            selectedDateKey={plannedForDate}
-            onPress={() => selectDateByOffset(1)}
-          />
-
-          <DatePresetButton
-            label="Übermorgen"
-            dateKey={getDateKeyWithOffset(2)}
-            selectedDateKey={plannedForDate}
-            onPress={() => selectDateByOffset(2)}
-          />
-        </View>
-
-        <TextInput
-          style={[
-            styles.dateInput,
-            !isPlannedDateValid && styles.dateInputInvalid,
-          ]}
-          value={plannedForDate}
-          onChangeText={setPlannedForDate}
-          placeholder="YYYY-MM-DD"
-          placeholderTextColor={colors.textDisabled}
-        />
-
-        <Text
-          style={[
-            styles.selectedDateText,
-            !isPlannedDateValid && styles.selectedDateTextInvalid,
-          ]}
-        >
-          {isPlannedDateValid
-            ? `Ausgewählt: ${formatShortDisplayDate(plannedForDate)}`
-            : "Ungültiges Datum. Nutze z. B. 2026-06-03."}
-        </Text>
-      </View>
-
-      <Text style={styles.todayTitle}>Heute</Text>
-
-      {todosApi.isLoading ? (
-        <Text style={styles.emptyText}>Lade Todos...</Text>
-      ) : (
-        <FlatList
-          data={todosApi.todayTodos}
-          keyExtractor={(item) => item.id}
-          contentContainerStyle={styles.listContent}
-          ListEmptyComponent={
-            <Text style={styles.emptyText}>
-              Noch keine Aufgaben für heute.
-            </Text>
-          }
-          renderItem={({ item }) => (
-            <TodoCard
-              todo={item}
-              onToggle={todosApi.toggleTodo}
-              onDelete={todosApi.deleteTodo}
-            />
-          )}
-        />
-      )}
+        )}
+      />
     </KeyboardAvoidingView>
   );
 }
@@ -219,8 +223,11 @@ function createStyles(colors: ThemeColors) {
   return StyleSheet.create({
     container: {
       flex: 1,
-      padding: 20,
       backgroundColor: colors.background,
+    },
+    listContent: {
+      padding: 20,
+      paddingBottom: 120,
     },
     header: {
       marginTop: 20,
@@ -366,13 +373,11 @@ function createStyles(colors: ThemeColors) {
       fontWeight: "900",
       marginBottom: 12,
     },
-    listContent: {
-      paddingBottom: 30,
-    },
     emptyText: {
       color: colors.textDisabled,
       textAlign: "center",
-      marginTop: 40,
+      marginTop: 28,
+      marginBottom: 20,
       fontSize: 15,
     },
   });
