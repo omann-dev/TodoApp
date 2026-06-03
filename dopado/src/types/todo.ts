@@ -8,4 +8,4 @@ export type Todo = {
     completedAt: string | null;
     deletedAt: string | null;
     idDone: boolean;
-}
+};
