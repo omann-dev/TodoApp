@@ -10,6 +10,7 @@ import {
   View,
 } from "react-native";
 import { TodoCard } from "../components/TodoCard";
+import { BrandText } from "../components/BrandText";
 import { UseTodosResult } from "../hooks/useTodos";
 import { useTheme } from "../theme/ThemeContext";
 import { ThemeColors } from "../theme/theme";
@@ -35,7 +36,7 @@ export function HomeScreen({ todosApi }: HomeScreenProps) {
       behavior={Platform.OS === "ios" ? "padding" : undefined}
     >
       <View style={styles.header}>
-        <Text style={styles.appName}>Dopado</Text>
+        <BrandText size={42} />
         <Text style={styles.subtitle}>Mach kleine Aufgaben sichtbar.</Text>
       </View>
 
