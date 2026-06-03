@@ -1,7 +1,9 @@
-import { StyleSheet, Text, View } from "react-native";
+import { ScrollView, StyleSheet, Text, View } from "react-native";
 import { UseTodosResult } from "../hooks/useTodos";
 import { useTheme } from "../theme/ThemeContext";
 import { ThemeColors } from "../theme/theme";
+import { useAppSettings } from "../settings/AppSettingsContext";
+import { ActivityHeatmap } from "../components/ActivityHeatmap";
 
 type StatsScreenProps = {
   todosApi: UseTodosResult;
@@ -11,6 +13,8 @@ export function StatsScreen({ todosApi }: StatsScreenProps) {
   const { colors } = useTheme();
   const styles = createStyles(colors);
 
+  const { dailyDopamineGoal, dopaminePointsPerTodo } = useAppSettings();
+
   const totalTodos = todosApi.allTodos.length;
   const completedTodos = todosApi.completedAllTodos;
   const openTodos = totalTodos - completedTodos;
@@ -18,31 +22,46 @@ export function StatsScreen({ todosApi }: StatsScreenProps) {
   const completionRate =
     totalTodos === 0 ? 0 : Math.round((completedTodos / totalTodos) * 100);
 
+  const totalDopaminePoints = completedTodos * dopaminePointsPerTodo;
+
   return (
-    <View style={styles.container}>
+    <ScrollView style={styles.container} contentContainerStyle={styles.content}>
       <Text style={styles.title}>Statistik</Text>
       <Text style={styles.subtitle}>Dein Fortschritt in Dopado.</Text>
 
-      <View style={styles.card}>
-        <Text style={styles.cardLabel}>Alle Aufgaben</Text>
-        <Text style={styles.cardValue}>{totalTodos}</Text>
-      </View>
+      <ActivityHeatmap
+        todos={todosApi.allTodos}
+        dopaminePointsPerTodo={dopaminePointsPerTodo}
+        dailyDopamineGoal={dailyDopamineGoal}
+      />
 
-      <View style={styles.card}>
-        <Text style={styles.cardLabel}>Erledigt</Text>
-        <Text style={styles.cardValue}>{completedTodos}</Text>
-      </View>
+      <View style={styles.grid}>
+        <View style={styles.card}>
+          <Text style={styles.cardLabel}>Alle Aufgaben</Text>
+          <Text style={styles.cardValue}>{totalTodos}</Text>
+        </View>
 
-      <View style={styles.card}>
-        <Text style={styles.cardLabel}>Offen</Text>
-        <Text style={styles.cardValue}>{openTodos}</Text>
-      </View>
+        <View style={styles.card}>
+          <Text style={styles.cardLabel}>Erledigt</Text>
+          <Text style={styles.cardValue}>{completedTodos}</Text>
+        </View>
 
-      <View style={styles.card}>
-        <Text style={styles.cardLabel}>Erledigungsrate</Text>
-        <Text style={styles.cardValue}>{completionRate}%</Text>
+        <View style={styles.card}>
+          <Text style={styles.cardLabel}>Offen</Text>
+          <Text style={styles.cardValue}>{openTodos}</Text>
+        </View>
+
+        <View style={styles.card}>
+          <Text style={styles.cardLabel}>Erledigungsrate</Text>
+          <Text style={styles.cardValue}>{completionRate}%</Text>
+        </View>
+
+        <View style={styles.cardWide}>
+          <Text style={styles.cardLabel}>Gesammelte Dopamin-Punkte</Text>
+          <Text style={styles.cardValue}>{totalDopaminePoints} DP</Text>
+        </View>
       </View>
-    </View>
+    </ScrollView>
   );
 }
 
@@ -50,13 +69,16 @@ function createStyles(colors: ThemeColors) {
   return StyleSheet.create({
     container: {
       flex: 1,
-      padding: 20,
       backgroundColor: colors.background,
+    },
+    content: {
+      padding: 20,
+      paddingBottom: 100,
     },
     title: {
       color: colors.text,
       fontSize: 32,
-      fontWeight: "800",
+      fontWeight: "900",
       marginTop: 20,
     },
     subtitle: {
@@ -65,23 +87,37 @@ function createStyles(colors: ThemeColors) {
       marginTop: 6,
       marginBottom: 20,
     },
+    grid: {
+      flexDirection: "row",
+      flexWrap: "wrap",
+      gap: 12,
+    },
     card: {
+      width: "48%",
       backgroundColor: colors.surface,
       borderWidth: 1,
       borderColor: colors.border,
       padding: 18,
       borderRadius: 18,
-      marginBottom: 14,
+    },
+    cardWide: {
+      width: "100%",
+      backgroundColor: colors.surface,
+      borderWidth: 1,
+      borderColor: colors.border,
+      padding: 18,
+      borderRadius: 18,
     },
     cardLabel: {
       color: colors.textMuted,
-      fontSize: 15,
+      fontSize: 14,
       marginBottom: 6,
+      fontWeight: "700",
     },
     cardValue: {
       color: colors.text,
-      fontSize: 28,
-      fontWeight: "800",
+      fontSize: 26,
+      fontWeight: "900",
     },
   });
 }
