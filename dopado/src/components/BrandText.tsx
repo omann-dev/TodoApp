@@ -1,13 +1,12 @@
-import { Image, StyleSheet, Text, View } from "react-native";
+import { StyleSheet, Text, View } from "react-native";
 import { useTheme } from "../theme/ThemeContext";
 import { ThemeColors } from "../theme/theme";
 
 type BrandTextProps = {
   size?: number;
-  showLogo?: boolean;
 };
 
-export function BrandText({ size = 40, showLogo = true }: BrandTextProps) {
+export function BrandText({ size = 40 }: BrandTextProps) {
   const { colors } = useTheme();
   const styles = createStyles(colors, size);
 
@@ -16,14 +15,6 @@ export function BrandText({ size = 40, showLogo = true }: BrandTextProps) {
       <Text style={styles.baseText}>
         Dopa<Text style={styles.accentText}>DO</Text>
       </Text>
-
-      {showLogo && (
-        <Image
-          source={require("../../assets/icon.png")}
-          style={styles.logo}
-          resizeMode="contain"
-        />
-      )}
     </View>
   );
 }
@@ -33,7 +24,6 @@ function createStyles(colors: ThemeColors, size: number) {
     container: {
       flexDirection: "row",
       alignItems: "center",
-      gap: 10,
     },
     baseText: {
       color: colors.text,
@@ -46,11 +36,6 @@ function createStyles(colors: ThemeColors, size: number) {
       fontSize: size,
       fontWeight: "900",
       letterSpacing: 0.4,
-    },
-    logo: {
-      width: size * 0.9,
-      height: size * 0.9,
-      borderRadius: size * 0.22,
     },
   });
 }
