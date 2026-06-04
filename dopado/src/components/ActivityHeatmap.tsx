@@ -4,6 +4,7 @@ import { Todo } from "../types/todo";
 import { useTheme } from "../theme/ThemeContext";
 import { ThemeColors } from "../theme/theme";
 import { getTodayDateKey } from "../services/dateService";
+import { useI18n } from "../i18n/I18nContext";
 
 type ActivityHeatmapProps = {
   todos: Todo[];
@@ -26,6 +27,7 @@ export function ActivityHeatmap({
   dailyDopamineGoal,
 }: ActivityHeatmapProps) {
   const { colors } = useTheme();
+  const { t, language } = useI18n();
   const styles = createStyles(colors);
 
   const [selectedDateKey, setSelectedDateKey] = useState(getTodayDateKey());
@@ -37,15 +39,14 @@ export function ActivityHeatmap({
   const weeks = useMemo(() => chunkIntoWeeks(days), [days]);
 
   const selectedDay =
-    days.find((day) => day.dateKey === selectedDateKey) ??
-    days[days.length - 1];
+    days.find((day) => day.dateKey === selectedDateKey) ?? days[days.length - 1];
 
   return (
     <View style={styles.card}>
       <View style={styles.header}>
         <View>
-          <Text style={styles.title}>Aktivität</Text>
-          <Text style={styles.subtitle}>Deine erledigten Todos der letzten Tage.</Text>
+          <Text style={styles.title}>{t("heatmap.title")}</Text>
+          <Text style={styles.subtitle}>{t("heatmap.subtitle")}</Text>
         </View>
       </View>
 
@@ -56,9 +57,9 @@ export function ActivityHeatmap({
       >
         <View style={styles.gridWrapper}>
           <View style={styles.dayLabels}>
-            <Text style={styles.dayLabel}>Mo</Text>
-            <Text style={styles.dayLabel}>Mi</Text>
-            <Text style={styles.dayLabel}>Fr</Text>
+            <Text style={styles.dayLabel}>{language === "de" ? "Mo" : "Mon"}</Text>
+            <Text style={styles.dayLabel}>{language === "de" ? "Mi" : "Wed"}</Text>
+            <Text style={styles.dayLabel}>{language === "de" ? "Fr" : "Fri"}</Text>
           </View>
 
           <View style={styles.weeksContainer}>
@@ -72,7 +73,13 @@ export function ActivityHeatmap({
                       key={day.dateKey}
                       style={[
                         styles.dayCell,
-                        { backgroundColor: getActivityColor(day, colors, dailyDopamineGoal) },
+                        {
+                          backgroundColor: getActivityColor(
+                            day,
+                            colors,
+                            dailyDopamineGoal
+                          ),
+                        },
                         isSelected && styles.dayCellSelected,
                       ]}
                       onPress={() => setSelectedDateKey(day.dateKey)}
@@ -86,20 +93,41 @@ export function ActivityHeatmap({
       </ScrollView>
 
       <View style={styles.legendRow}>
-        <Text style={styles.legendText}>Weniger</Text>
-        <View style={[styles.legendCell, { backgroundColor: colors.surfaceLight }]} />
-        <View style={[styles.legendCell, { backgroundColor: colors.primaryDark }]} />
-        <View style={[styles.legendCell, { backgroundColor: colors.primary }]} />
-        <View style={[styles.legendCell, { backgroundColor: colors.reward }]} />
-        <View style={[styles.legendCell, { backgroundColor: colors.success }]} />
-        <Text style={styles.legendText}>Mehr</Text>
+        <Text style={styles.legendText}>{t("heatmap.less")}</Text>
+        <View
+          style={[
+            styles.legendCell,
+            { backgroundColor: colors.surfaceLight },
+          ]}
+        />
+        <View
+          style={[
+            styles.legendCell,
+            { backgroundColor: colors.primaryDark },
+          ]}
+        />
+        <View
+          style={[styles.legendCell, { backgroundColor: colors.primary }]}
+        />
+        <View
+          style={[styles.legendCell, { backgroundColor: colors.reward }]}
+        />
+        <View
+          style={[styles.legendCell, { backgroundColor: colors.success }]}
+        />
+        <Text style={styles.legendText}>{t("heatmap.more")}</Text>
       </View>
 
       <View style={styles.selectedCard}>
-        <Text style={styles.selectedDate}>{formatDateKey(selectedDay.dateKey)}</Text>
+        <Text style={styles.selectedDate}>
+          {formatDateKey(selectedDay.dateKey, language)}
+        </Text>
 
         <Text style={styles.selectedText}>
-          {selectedDay.completedTodos} Todos erledigt · {selectedDay.dopaminePoints} DP
+          {t("heatmap.selected", {
+            completed: selectedDay.completedTodos,
+            points: selectedDay.dopaminePoints,
+          })}
         </Text>
 
         <Text
@@ -111,8 +139,8 @@ export function ActivityHeatmap({
           ]}
         >
           {selectedDay.goalReached
-            ? "Dopamin-Ziel erreicht"
-            : "Dopamin-Ziel noch offen"}
+            ? t("heatmap.goalReached")
+            : t("heatmap.goalOpen")}
         </Text>
       </View>
     </View>
@@ -180,7 +208,8 @@ function getActivityColor(
     return colors.success;
   }
 
-  const progress = dailyDopamineGoal === 0 ? 0 : day.dopaminePoints / dailyDopamineGoal;
+  const progress =
+    dailyDopamineGoal === 0 ? 0 : day.dopaminePoints / dailyDopamineGoal;
 
   if (progress < 0.34) {
     return colors.primaryDark;
@@ -205,11 +234,12 @@ function getDateKeyFromDate(date: Date): string {
   return `${year}-${month}-${day}`;
 }
 
-function formatDateKey(dateKey: string): string {
+function formatDateKey(dateKey: string, language: "de" | "en"): string {
   const [year, month, day] = dateKey.split("-").map(Number);
   const date = new Date(year, month - 1, day);
+  const locale = language === "de" ? "de-DE" : "en-US";
 
-  return date.toLocaleDateString("de-DE", {
+  return date.toLocaleDateString(locale, {
     weekday: "long",
     day: "2-digit",
     month: "2-digit",

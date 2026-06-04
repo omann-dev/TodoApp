@@ -11,6 +11,8 @@ import {
 import { useTheme } from "../theme/ThemeContext";
 import { ThemeColors } from "../theme/theme";
 import { useAppSettings } from "../settings/AppSettingsContext";
+import { useI18n } from "../i18n/I18nContext";
+import { Language } from "../i18n/translations";
 
 type SettingsScreenProps = {
   onClose: () => void;
@@ -22,6 +24,8 @@ export function SettingsScreen({ onClose }: SettingsScreenProps) {
 
   const { colors, themeName, setThemeName } = useTheme();
   const styles = createStyles(colors);
+
+  const { t, language, setLanguage } = useI18n();
 
   const {
     dailyDopamineGoal,
@@ -61,19 +65,19 @@ export function SettingsScreen({ onClose }: SettingsScreenProps) {
         </Pressable>
 
         <View style={styles.headerTextContainer}>
-          <Text style={styles.title}>Einstellungen</Text>
-          <Text style={styles.subtitle}>Passe Dopado an dich an.</Text>
+          <Text style={styles.title}>{t("settings.title")}</Text>
+          <Text style={styles.subtitle}>{t("settings.subtitle")}</Text>
         </View>
       </View>
 
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Darstellung</Text>
+        <Text style={styles.sectionTitle}>{t("settings.display")}</Text>
 
         <View style={styles.settingRow}>
           <View style={styles.settingTextContainer}>
-            <Text style={styles.settingTitle}>Dunkles Theme</Text>
+            <Text style={styles.settingTitle}>{t("settings.darkTheme")}</Text>
             <Text style={styles.settingDescription}>
-              Wechsle zwischen hellem und dunklem Design.
+              {t("settings.darkThemeDescription")}
             </Text>
           </View>
 
@@ -84,16 +88,45 @@ export function SettingsScreen({ onClose }: SettingsScreenProps) {
             }
           />
         </View>
+
+        <View style={styles.settingRow}>
+          <View style={styles.settingTextContainer}>
+            <Text style={styles.settingTitle}>{t("settings.language")}</Text>
+            <Text style={styles.settingDescription}>
+              {t("settings.languageDescription")}
+            </Text>
+          </View>
+
+          <View style={styles.languageButtonGroup}>
+            <LanguageButton
+              label="DE"
+              languageValue="de"
+              currentLanguage={language}
+              onPress={setLanguage}
+            />
+
+            <LanguageButton
+              label="EN"
+              languageValue="en"
+              currentLanguage={language}
+              onPress={setLanguage}
+            />
+          </View>
+        </View>
       </View>
 
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Gamification</Text>
+        <Text style={styles.sectionTitle}>{t("settings.gamification")}</Text>
 
         <View style={styles.goalCard}>
-          <Text style={styles.settingTitle}>Tägliche Dopamin-Dosis</Text>
+          <Text style={styles.settingTitle}>
+            {t("settings.dailyDopamineGoal")}
+          </Text>
+
           <Text style={styles.settingDescription}>
-            Jede erledigte Todo gibt aktuell {dopaminePointsPerTodo} DP. Hier
-            legst du fest, wie viele Punkte deine Tagesleiste füllen.
+            {t("settings.dailyDopamineGoalDescription", {
+              points: dopaminePointsPerTodo,
+            })}
           </Text>
 
           <View style={styles.goalInputRow}>
@@ -108,7 +141,7 @@ export function SettingsScreen({ onClose }: SettingsScreenProps) {
             />
 
             <Pressable style={styles.saveButton} onPress={handleSaveGoal}>
-              <Text style={styles.saveButtonText}>Speichern</Text>
+              <Text style={styles.saveButtonText}>{t("settings.save")}</Text>
             </Pressable>
           </View>
 
@@ -121,9 +154,11 @@ export function SettingsScreen({ onClose }: SettingsScreenProps) {
 
         <View style={styles.settingRow}>
           <View style={styles.settingTextContainer}>
-            <Text style={styles.settingTitle}>Dopamin-Modus</Text>
+            <Text style={styles.settingTitle}>
+              {t("settings.dopamineMode")}
+            </Text>
             <Text style={styles.settingDescription}>
-              Kleine motivierende Fortschrittsanzeigen aktivieren.
+              {t("settings.dopamineModeDescription")}
             </Text>
           </View>
 
@@ -135,13 +170,15 @@ export function SettingsScreen({ onClose }: SettingsScreenProps) {
       </View>
 
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Allgemein</Text>
+        <Text style={styles.sectionTitle}>{t("settings.general")}</Text>
 
         <View style={styles.settingRow}>
           <View style={styles.settingTextContainer}>
-            <Text style={styles.settingTitle}>Tägliche Erinnerung</Text>
+            <Text style={styles.settingTitle}>
+              {t("settings.dailyReminder")}
+            </Text>
             <Text style={styles.settingDescription}>
-              Später kannst du dich an offene Todos erinnern lassen.
+              {t("settings.dailyReminderDescription")}
             </Text>
           </View>
 
@@ -153,18 +190,17 @@ export function SettingsScreen({ onClose }: SettingsScreenProps) {
       </View>
 
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Daten</Text>
+        <Text style={styles.sectionTitle}>{t("settings.data")}</Text>
 
         <View style={styles.infoCard}>
-          <Text style={styles.infoTitle}>Lokale Speicherung</Text>
+          <Text style={styles.infoTitle}>{t("settings.localStorage")}</Text>
           <Text style={styles.infoText}>
-            Deine Todos und Einstellungen werden aktuell lokal auf deinem Gerät
-            gespeichert.
+            {t("settings.localStorageDescription")}
           </Text>
         </View>
 
         <View style={styles.infoCard}>
-          <Text style={styles.infoTitle}>Version</Text>
+          <Text style={styles.infoTitle}>{t("settings.version")}</Text>
           <Text style={styles.infoText}>Dopado 1.0.0</Text>
         </View>
       </View>
@@ -186,6 +222,44 @@ function PresetButton({ label, value, onPress }: PresetButtonProps) {
     <Pressable style={styles.presetButton} onPress={() => onPress(value)}>
       <Text style={styles.presetLabel}>{label}</Text>
       <Text style={styles.presetValue}>{value} DP</Text>
+    </Pressable>
+  );
+}
+
+type LanguageButtonProps = {
+  label: string;
+  languageValue: Language;
+  currentLanguage: Language;
+  onPress: (language: Language) => Promise<void>;
+};
+
+function LanguageButton({
+  label,
+  languageValue,
+  currentLanguage,
+  onPress,
+}: LanguageButtonProps) {
+  const { colors } = useTheme();
+  const styles = createStyles(colors);
+
+  const isSelected = languageValue === currentLanguage;
+
+  return (
+    <Pressable
+      style={[
+        styles.languageButton,
+        isSelected && styles.languageButtonSelected,
+      ]}
+      onPress={() => void onPress(languageValue)}
+    >
+      <Text
+        style={[
+          styles.languageButtonText,
+          isSelected && styles.languageButtonTextSelected,
+        ]}
+      >
+        {label}
+      </Text>
     </Pressable>
   );
 }
@@ -270,6 +344,32 @@ function createStyles(colors: ThemeColors) {
       color: colors.textMuted,
       fontSize: 14,
       lineHeight: 19,
+    },
+    languageButtonGroup: {
+      flexDirection: "row",
+      gap: 8,
+    },
+    languageButton: {
+      minWidth: 44,
+      paddingHorizontal: 12,
+      paddingVertical: 9,
+      borderRadius: 999,
+      backgroundColor: colors.background,
+      borderWidth: 1,
+      borderColor: colors.border,
+      alignItems: "center",
+    },
+    languageButtonSelected: {
+      backgroundColor: colors.primary,
+      borderColor: colors.primary,
+    },
+    languageButtonText: {
+      color: colors.text,
+      fontSize: 12,
+      fontWeight: "900",
+    },
+    languageButtonTextSelected: {
+      color: "#ffffff",
     },
     goalCard: {
       backgroundColor: colors.surface,

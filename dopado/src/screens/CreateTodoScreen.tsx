@@ -19,6 +19,7 @@ import {
   getTodayDateKey,
   isValidDateKey,
 } from "../services/dateService";
+import { useI18n } from "../i18n/I18nContext";
 
 type CreateTodoScreenProps = {
   todosApi: UseTodosResult;
@@ -40,6 +41,7 @@ export function CreateTodoScreen({
   onCreated,
 }: CreateTodoScreenProps) {
   const { colors } = useTheme();
+  const { t } = useI18n();
   const styles = createStyles(colors);
 
   const { categories, addCategory } = useCategories();
@@ -102,29 +104,27 @@ export function CreateTodoScreen({
           </Pressable>
 
           <View style={styles.headerTextContainer}>
-            <Text style={styles.title}>Neue Todo</Text>
-            <Text style={styles.subtitle}>
-              Plane deine Aufgabe und sammle später Dopamin-Punkte.
-            </Text>
+            <Text style={styles.title}>{t("createTodo.title")}</Text>
+            <Text style={styles.subtitle}>{t("createTodo.subtitle")}</Text>
           </View>
         </View>
 
         <View style={styles.card}>
-          <Text style={styles.label}>Überschrift</Text>
+          <Text style={styles.label}>{t("createTodo.heading")}</Text>
 
           <TextInput
             style={styles.input}
-            placeholder="z. B. 30 Minuten Sport"
+            placeholder={t("createTodo.headingPlaceholder")}
             placeholderTextColor={colors.textDisabled}
             value={title}
             onChangeText={setTitle}
           />
 
-          <Text style={styles.label}>Beschreibung</Text>
+          <Text style={styles.label}>{t("createTodo.description")}</Text>
 
           <TextInput
             style={[styles.input, styles.descriptionInput]}
-            placeholder="Optional: Details, Notizen, Kontext..."
+            placeholder={t("createTodo.descriptionPlaceholder")}
             placeholderTextColor={colors.textDisabled}
             value={description}
             onChangeText={setDescription}
@@ -132,25 +132,25 @@ export function CreateTodoScreen({
             textAlignVertical="top"
           />
 
-          <Text style={styles.label}>Geplant für</Text>
+          <Text style={styles.label}>{t("createTodo.plannedFor")}</Text>
 
           <View style={styles.datePresetRow}>
             <DatePresetButton
-              label="Heute"
+              label={t("createTodo.today")}
               dateKey={getDateKeyWithOffset(0)}
               selectedDateKey={plannedForDate}
               onPress={() => selectDateByOffset(0)}
             />
 
             <DatePresetButton
-              label="Morgen"
+              label={t("createTodo.tomorrow")}
               dateKey={getDateKeyWithOffset(1)}
               selectedDateKey={plannedForDate}
               onPress={() => selectDateByOffset(1)}
             />
 
             <DatePresetButton
-              label="Übermorgen"
+              label={t("createTodo.dayAfterTomorrow")}
               dateKey={getDateKeyWithOffset(2)}
               selectedDateKey={plannedForDate}
               onPress={() => selectDateByOffset(2)}
@@ -172,17 +172,19 @@ export function CreateTodoScreen({
             ]}
           >
             {isDateValid
-              ? `Ausgewählt: ${formatShortDisplayDate(plannedForDate)}`
-              : "Ungültiges Datum. Nutze z. B. 2026-06-03."}
+              ? t("createTodo.selectedDate", {
+                  date: formatShortDisplayDate(plannedForDate),
+                })
+              : t("createTodo.invalidDate")}
           </Text>
         </View>
 
         <View style={styles.card}>
           <View style={styles.sectionHeaderRow}>
             <View>
-              <Text style={styles.cardTitle}>Kategorie</Text>
+              <Text style={styles.cardTitle}>{t("createTodo.category")}</Text>
               <Text style={styles.helperText}>
-                Optional, aber hilfreich für spätere Stats.
+                {t("createTodo.categoryDescription")}
               </Text>
             </View>
 
@@ -191,7 +193,7 @@ export function CreateTodoScreen({
               onPress={() => setIsCategoryMenuOpen((current) => !current)}
             >
               <Text style={styles.smallButtonText}>
-                {isCategoryMenuOpen ? "Schließen" : "+ Neu"}
+                {isCategoryMenuOpen ? t("createTodo.close") : t("createTodo.new")}
               </Text>
             </Pressable>
           </View>
@@ -211,7 +213,7 @@ export function CreateTodoScreen({
                     styles.categoryChipTextSelected,
                 ]}
               >
-                Keine
+                {t("createTodo.none")}
               </Text>
             </Pressable>
 
@@ -249,17 +251,17 @@ export function CreateTodoScreen({
 
           {isCategoryMenuOpen && (
             <View style={styles.categoryMenu}>
-              <Text style={styles.label}>Neue Kategorie</Text>
+              <Text style={styles.label}>{t("createTodo.newCategory")}</Text>
 
               <TextInput
                 style={styles.input}
-                placeholder="z. B. Sport, Uni, Arbeit"
+                placeholder={t("createTodo.categoryPlaceholder")}
                 placeholderTextColor={colors.textDisabled}
                 value={newCategoryName}
                 onChangeText={setNewCategoryName}
               />
 
-              <Text style={styles.label}>Farbe</Text>
+              <Text style={styles.label}>{t("createTodo.color")}</Text>
 
               <View style={styles.colorRow}>
                 {CATEGORY_COLORS.map((color) => {
@@ -288,7 +290,7 @@ export function CreateTodoScreen({
                 onPress={handleCreateCategory}
               >
                 <Text style={styles.createCategoryButtonText}>
-                  Kategorie erstellen
+                  {t("createTodo.createCategory")}
                 </Text>
               </Pressable>
             </View>
@@ -302,7 +304,7 @@ export function CreateTodoScreen({
           ]}
           onPress={handleCreateTodo}
         >
-          <Text style={styles.createButtonText}>Todo erstellen</Text>
+          <Text style={styles.createButtonText}>{t("createTodo.create")}</Text>
         </Pressable>
       </ScrollView>
     </KeyboardAvoidingView>

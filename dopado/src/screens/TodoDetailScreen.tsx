@@ -4,6 +4,7 @@ import { useTheme } from "../theme/ThemeContext";
 import { ThemeColors } from "../theme/theme";
 import { useAppSettings } from "../settings/AppSettingsContext";
 import { formatDisplayDate } from "../services/dateService";
+import { useI18n } from "../i18n/I18nContext";
 
 type TodoDetailScreenProps = {
   todoId: string;
@@ -17,6 +18,7 @@ export function TodoDetailScreen({
   onBack,
 }: TodoDetailScreenProps) {
   const { colors } = useTheme();
+  const { t, language } = useI18n();
   const styles = createStyles(colors);
 
   const { dopaminePointsPerTodo } = useAppSettings();
@@ -31,9 +33,9 @@ export function TodoDetailScreen({
             <Text style={styles.backButtonText}>←</Text>
           </Pressable>
 
-          <Text style={styles.title}>Todo nicht gefunden</Text>
+          <Text style={styles.title}>{t("todoDetail.notFound")}</Text>
           <Text style={styles.subtitle}>
-            Diese Aufgabe existiert nicht mehr oder wurde gelöscht.
+            {t("todoDetail.notFoundDescription")}
           </Text>
         </View>
       </View>
@@ -48,8 +50,8 @@ export function TodoDetailScreen({
         </Pressable>
 
         <View style={styles.headerTextContainer}>
-          <Text style={styles.title}>Todo Details</Text>
-          <Text style={styles.subtitle}>Alle Informationen zu deiner Aufgabe.</Text>
+          <Text style={styles.title}>{t("todoDetail.title")}</Text>
+          <Text style={styles.subtitle}>{t("todoDetail.subtitle")}</Text>
         </View>
       </View>
 
@@ -62,7 +64,7 @@ export function TodoDetailScreen({
             ]}
           >
             <Text style={styles.statusBadgeText}>
-              {todo.isDone ? "ERLEDIGT" : "OFFEN"}
+              {todo.isDone ? t("todoDetail.done") : t("todoDetail.open")}
             </Text>
           </View>
 
@@ -88,25 +90,32 @@ export function TodoDetailScreen({
       </View>
 
       <View style={styles.infoCard}>
-        <Text style={styles.sectionTitle}>Beschreibung</Text>
+        <Text style={styles.sectionTitle}>{t("todoDetail.description")}</Text>
 
         <Text style={styles.descriptionText}>
           {todo.description && todo.description.trim().length > 0
             ? todo.description
-            : "Keine Beschreibung hinterlegt."}
+            : t("todoDetail.noDescription")}
         </Text>
       </View>
 
       <View style={styles.infoCard}>
-        <Text style={styles.sectionTitle}>Planung</Text>
+        <Text style={styles.sectionTitle}>{t("todoDetail.planning")}</Text>
 
-        <InfoRow label="Geplant für" value={formatDisplayDate(todo.plannedFor)} />
-        <InfoRow label="Erstellt am" value={formatDateTime(todo.createdAt)} />
+        <InfoRow
+          label={t("todoDetail.plannedFor")}
+          value={formatDisplayDate(todo.plannedFor)}
+        />
+
+        <InfoRow
+          label={t("todoDetail.createdAt")}
+          value={formatDateTime(todo.createdAt, language)}
+        />
 
         {todo.completedAt && (
           <InfoRow
-            label="Erledigt am"
-            value={formatDateTime(todo.completedAt)}
+            label={t("todoDetail.completedAt")}
+            value={formatDateTime(todo.completedAt, language)}
           />
         )}
       </View>
@@ -131,8 +140,10 @@ function InfoRow({ label, value }: InfoRowProps) {
   );
 }
 
-function formatDateTime(timestamp: string): string {
-  return new Date(timestamp).toLocaleString("de-DE", {
+function formatDateTime(timestamp: string, language: "de" | "en"): string {
+  const locale = language === "de" ? "de-DE" : "en-US";
+
+  return new Date(timestamp).toLocaleString(locale, {
     day: "2-digit",
     month: "2-digit",
     year: "numeric",

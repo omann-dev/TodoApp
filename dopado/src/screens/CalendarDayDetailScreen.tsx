@@ -6,6 +6,7 @@ import { ThemeColors } from "../theme/theme";
 import { useAppSettings } from "../settings/AppSettingsContext";
 import { formatDisplayDate } from "../services/dateService";
 import { DopamineBar } from "../components/DopamineBar";
+import { useI18n } from "../i18n/I18nContext";
 
 type CalendarDayDetailScreenProps = {
   dateKey: string;
@@ -19,6 +20,7 @@ export function CalendarDayDetailScreen({
   onBack,
 }: CalendarDayDetailScreenProps) {
   const { colors } = useTheme();
+  const { t } = useI18n();
   const styles = createStyles(colors);
 
   const { dailyDopamineGoal, dopaminePointsPerTodo } = useAppSettings();
@@ -42,7 +44,7 @@ export function CalendarDayDetailScreen({
 
         <View style={styles.headerTextContainer}>
           <Text style={styles.title}>{formatDisplayDate(dateKey)}</Text>
-          <Text style={styles.subtitle}>Tagesdetails</Text>
+          <Text style={styles.subtitle}>{t("calendarDetail.title")}</Text>
         </View>
       </View>
 
@@ -53,11 +55,16 @@ export function CalendarDayDetailScreen({
         ]}
       >
         <Text style={styles.statusTitle}>
-          {goalReached ? "Dopamin-Ziel erreicht" : "Dopamin-Ziel nicht erreicht"}
+          {goalReached
+            ? t("calendarDetail.goalReached")
+            : t("calendarDetail.goalNotReached")}
         </Text>
 
         <Text style={styles.statusText}>
-          {dopaminePoints} / {dailyDopamineGoal} DP gesammelt
+          {t("calendarDetail.points", {
+            points: dopaminePoints,
+            goal: dailyDopamineGoal,
+          })}
         </Text>
       </View>
 
@@ -66,24 +73,26 @@ export function CalendarDayDetailScreen({
       <View style={styles.summaryGrid}>
         <View style={styles.summaryCard}>
           <Text style={styles.summaryValue}>{todosForDay.length}</Text>
-          <Text style={styles.summaryLabel}>Todos</Text>
+          <Text style={styles.summaryLabel}>{t("calendarDetail.todos")}</Text>
         </View>
 
         <View style={styles.summaryCard}>
           <Text style={styles.summaryValue}>{completedTodos}</Text>
-          <Text style={styles.summaryLabel}>Erledigt</Text>
+          <Text style={styles.summaryLabel}>
+            {t("calendarDetail.completed")}
+          </Text>
         </View>
 
         <View style={styles.summaryCard}>
           <Text style={styles.summaryValue}>{openTodos}</Text>
-          <Text style={styles.summaryLabel}>Offen</Text>
+          <Text style={styles.summaryLabel}>{t("calendarDetail.open")}</Text>
         </View>
       </View>
 
-      <Text style={styles.sectionTitle}>Aufgaben</Text>
+      <Text style={styles.sectionTitle}>{t("calendarDetail.tasks")}</Text>
 
       {todosForDay.length === 0 ? (
-        <Text style={styles.emptyText}>Keine Todos für diesen Tag.</Text>
+        <Text style={styles.emptyText}>{t("calendarDetail.empty")}</Text>
       ) : (
         todosForDay.map((todo) => (
           <ReadOnlyTodoCard
@@ -107,6 +116,7 @@ function ReadOnlyTodoCard({
   dopaminePointsPerTodo,
 }: ReadOnlyTodoCardProps) {
   const { colors } = useTheme();
+  const { t } = useI18n();
   const styles = createStyles(colors);
 
   return (
@@ -120,15 +130,35 @@ function ReadOnlyTodoCard({
           {todo.title}
         </Text>
 
+        {todo.description && todo.description.trim().length > 0 && (
+          <Text style={styles.todoDescription} numberOfLines={2}>
+            {todo.description}
+          </Text>
+        )}
+
+        {todo.categoryName && (
+          <View style={styles.categoryRow}>
+            <View
+              style={[
+                styles.categoryDot,
+                { backgroundColor: todo.categoryColor ?? colors.primary },
+              ]}
+            />
+            <Text style={styles.categoryText}>{todo.categoryName}</Text>
+          </View>
+        )}
+
         <Text style={styles.todoMeta}>
           {todo.isDone
-            ? `Erledigt · +${dopaminePointsPerTodo} DP`
-            : "Nicht erledigt · +0 DP"}
+            ? t("calendarDetail.todoDone", { points: dopaminePointsPerTodo })
+            : t("calendarDetail.todoOpen")}
         </Text>
 
         {todo.completedAt && (
           <Text style={styles.todoMetaSmall}>
-            Abgeschlossen: {formatDateTime(todo.completedAt)}
+            {t("calendarDetail.completedAt", {
+              date: formatDateTime(todo.completedAt),
+            })}
           </Text>
         )}
       </View>
@@ -293,6 +323,28 @@ function createStyles(colors: ThemeColors) {
     },
     todoTitleDone: {
       color: colors.text,
+    },
+    todoDescription: {
+      color: colors.textMuted,
+      fontSize: 13,
+      marginTop: 5,
+      lineHeight: 18,
+    },
+    categoryRow: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 6,
+      marginTop: 7,
+    },
+    categoryDot: {
+      width: 8,
+      height: 8,
+      borderRadius: 999,
+    },
+    categoryText: {
+      color: colors.textMuted,
+      fontSize: 12,
+      fontWeight: "800",
     },
     todoMeta: {
       color: colors.textMuted,

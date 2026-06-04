@@ -13,6 +13,7 @@ import { ThemeProvider, useTheme } from "./src/theme/ThemeContext";
 import { ThemeColors } from "./src/theme/theme";
 import { TodoDetailScreen } from "./src/screens/TodoDetailScreen";
 import { Todo } from "./src/types/todo";
+import { I18nProvider, useI18n } from "./src/i18n/I18nContext";
 import {
   AppSettingsProvider,
   useAppSettings,
@@ -32,7 +33,9 @@ export default function App() {
   return (
     <ThemeProvider>
       <AppSettingsProvider>
-        <AppContent />
+        <I18nProvider>
+          <AppContent />
+        </I18nProvider>
       </AppSettingsProvider>
     </ThemeProvider>
   );
@@ -54,6 +57,8 @@ function AppContent() {
   const { colors } = useTheme();
   const styles = createStyles(colors);
 
+  const { t, isLanguageLoading } = useI18n();
+
   useEffect(() => {
     const timer = setTimeout(() => {
       setHasStartupTimePassed(true);
@@ -63,7 +68,10 @@ function AppContent() {
   }, []);
 
   const shouldShowStartupScreen =
-    !hasStartupTimePassed || todosApi.isLoading || isSettingsLoading;
+  !hasStartupTimePassed ||
+  todosApi.isLoading ||
+  isSettingsLoading ||
+  isLanguageLoading;
 
   if (shouldShowStartupScreen) {
     return (
@@ -196,19 +204,19 @@ function AppContent() {
       {shouldShowTabBar && (
         <View style={styles.tabBar}>
           <TabButton
-            label="Heute"
+            label={t("tabs.today")}
             isActive={activeScreen === "home"}
             onPress={() => changeMainScreen("home")}
           />
 
           <TabButton
-            label="Kalender"
+            label={t("tabs.calendar")}
             isActive={activeScreen === "calendar"}
             onPress={() => changeMainScreen("calendar")}
           />
 
           <TabButton
-            label="Stats"
+            label={t("tabs.stats")}
             isActive={activeScreen === "stats"}
             onPress={() => changeMainScreen("stats")}
           />

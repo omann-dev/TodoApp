@@ -2,9 +2,11 @@ import { ActivityIndicator, StyleSheet, Text, View } from "react-native";
 import { BrandText } from "../components/BrandText";
 import { useTheme } from "../theme/ThemeContext";
 import { ThemeColors } from "../theme/theme";
+import { useI18n } from "../i18n/I18nContext";
 
 export function StartupScreen() {
   const { colors } = useTheme();
+  const { t } = useI18n();
   const styles = createStyles(colors);
 
   return (
@@ -12,12 +14,12 @@ export function StartupScreen() {
       <View style={styles.logoWrapper}>
         <BrandText size={48} />
 
-        <Text style={styles.tagline}>Load your day.</Text>
+        <Text style={styles.tagline}>{t("startup.tagline")}</Text>
       </View>
 
       <View style={styles.loadingCard}>
         <ActivityIndicator size="small" color={colors.reward} />
-        <Text style={styles.loadingText}>Dopamin wird geladen...</Text>
+        <Text style={styles.loadingText}>{t("startup.loading")}</Text>
       </View>
     </View>
   );

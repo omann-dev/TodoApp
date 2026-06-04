@@ -5,6 +5,7 @@ import { useTheme } from "../theme/ThemeContext";
 import { ThemeColors } from "../theme/theme";
 import { formatDisplayDate } from "../services/dateService";
 import { useAppSettings } from "../settings/AppSettingsContext";
+import { useI18n } from "../i18n/I18nContext";
 
 type CalendarScreenProps = {
   todosApi: UseTodosResult;
@@ -24,6 +25,7 @@ function groupTodosByDate(todos: Todo[]) {
 
 export function CalendarScreen({ todosApi, onOpenDay }: CalendarScreenProps) {
   const { colors } = useTheme();
+  const { t } = useI18n();
   const styles = createStyles(colors);
 
   const { dailyDopamineGoal, dopaminePointsPerTodo } = useAppSettings();
@@ -33,13 +35,11 @@ export function CalendarScreen({ todosApi, onOpenDay }: CalendarScreenProps) {
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-      <Text style={styles.title}>Kalender</Text>
-      <Text style={styles.subtitle}>
-        Tippe auf einen Tag, um die Details zu sehen.
-      </Text>
+      <Text style={styles.title}>{t("calendar.title")}</Text>
+      <Text style={styles.subtitle}>{t("calendar.subtitle")}</Text>
 
       {dates.length === 0 && (
-        <Text style={styles.emptyText}>Noch keine gespeicherten Tage.</Text>
+        <Text style={styles.emptyText}>{t("calendar.empty")}</Text>
       )}
 
       {dates.map((date) => {
@@ -48,6 +48,10 @@ export function CalendarScreen({ todosApi, onOpenDay }: CalendarScreenProps) {
         const dopaminePoints = completed * dopaminePointsPerTodo;
         const goalReached = dopaminePoints >= dailyDopamineGoal;
         const remainingPoints = Math.max(dailyDopamineGoal - dopaminePoints, 0);
+        const progressPercent =
+          dailyDopamineGoal === 0
+            ? 0
+            : Math.min(Math.round((dopaminePoints / dailyDopamineGoal) * 100), 100);
 
         return (
           <Pressable
@@ -62,13 +66,16 @@ export function CalendarScreen({ todosApi, onOpenDay }: CalendarScreenProps) {
               <View style={styles.dayTextContainer}>
                 <Text style={styles.date}>{formatDisplayDate(date)}</Text>
                 <Text style={styles.summary}>
-                  {completed} von {todos.length} Todos erledigt
+                  {t("calendar.completedTodos", {
+                    completed,
+                    total: todos.length,
+                  })}
                 </Text>
               </View>
 
               <View style={styles.statusBadge}>
                 <Text style={styles.statusBadgeText}>
-                  {goalReached ? "DONE" : "OFFEN"}
+                  {goalReached ? t("calendar.done") : t("calendar.open")}
                 </Text>
               </View>
             </View>
@@ -78,10 +85,7 @@ export function CalendarScreen({ todosApi, onOpenDay }: CalendarScreenProps) {
                 style={[
                   styles.progressFill,
                   {
-                    width: `${Math.min(
-                      Math.round((dopaminePoints / dailyDopamineGoal) * 100),
-                      100
-                    )}%`,
+                    width: `${progressPercent}%`,
                   },
                 ]}
               />
@@ -89,8 +93,15 @@ export function CalendarScreen({ todosApi, onOpenDay }: CalendarScreenProps) {
 
             <Text style={styles.pointsText}>
               {goalReached
-                ? `${dopaminePoints} / ${dailyDopamineGoal} DP · Ziel erreicht`
-                : `${dopaminePoints} / ${dailyDopamineGoal} DP · noch ${remainingPoints} DP`}
+                ? t("calendar.goalReached", {
+                    points: dopaminePoints,
+                    goal: dailyDopamineGoal,
+                  })
+                : t("calendar.goalOpen", {
+                    points: dopaminePoints,
+                    goal: dailyDopamineGoal,
+                    remaining: remainingPoints,
+                  })}
             </Text>
           </Pressable>
         );

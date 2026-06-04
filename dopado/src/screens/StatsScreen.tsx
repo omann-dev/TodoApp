@@ -4,6 +4,7 @@ import { useTheme } from "../theme/ThemeContext";
 import { ThemeColors } from "../theme/theme";
 import { useAppSettings } from "../settings/AppSettingsContext";
 import { ActivityHeatmap } from "../components/ActivityHeatmap";
+import { useI18n } from "../i18n/I18nContext";
 
 type StatsScreenProps = {
   todosApi: UseTodosResult;
@@ -11,6 +12,7 @@ type StatsScreenProps = {
 
 export function StatsScreen({ todosApi }: StatsScreenProps) {
   const { colors } = useTheme();
+  const { t } = useI18n();
   const styles = createStyles(colors);
 
   const { dailyDopamineGoal, dopaminePointsPerTodo } = useAppSettings();
@@ -26,8 +28,8 @@ export function StatsScreen({ todosApi }: StatsScreenProps) {
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-      <Text style={styles.title}>Statistik</Text>
-      <Text style={styles.subtitle}>Dein Fortschritt in Dopado.</Text>
+      <Text style={styles.title}>{t("stats.title")}</Text>
+      <Text style={styles.subtitle}>{t("stats.subtitle")}</Text>
 
       <ActivityHeatmap
         todos={todosApi.allTodos}
@@ -37,27 +39,27 @@ export function StatsScreen({ todosApi }: StatsScreenProps) {
 
       <View style={styles.grid}>
         <View style={styles.card}>
-          <Text style={styles.cardLabel}>Alle Aufgaben</Text>
+          <Text style={styles.cardLabel}>{t("stats.allTasks")}</Text>
           <Text style={styles.cardValue}>{totalTodos}</Text>
         </View>
 
         <View style={styles.card}>
-          <Text style={styles.cardLabel}>Erledigt</Text>
+          <Text style={styles.cardLabel}>{t("stats.completed")}</Text>
           <Text style={styles.cardValue}>{completedTodos}</Text>
         </View>
 
         <View style={styles.card}>
-          <Text style={styles.cardLabel}>Offen</Text>
+          <Text style={styles.cardLabel}>{t("stats.open")}</Text>
           <Text style={styles.cardValue}>{openTodos}</Text>
         </View>
 
         <View style={styles.card}>
-          <Text style={styles.cardLabel}>Erledigungsrate</Text>
+          <Text style={styles.cardLabel}>{t("stats.completionRate")}</Text>
           <Text style={styles.cardValue}>{completionRate}%</Text>
         </View>
 
         <View style={styles.cardWide}>
-          <Text style={styles.cardLabel}>Gesammelte Dopamin-Punkte</Text>
+          <Text style={styles.cardLabel}>{t("stats.totalDp")}</Text>
           <Text style={styles.cardValue}>{totalDopaminePoints} DP</Text>
         </View>
       </View>

@@ -7,6 +7,7 @@ import { ThemeColors } from "../theme/theme";
 import { useAppSettings } from "../settings/AppSettingsContext";
 import { BrandText } from "../components/BrandText";
 import { Todo } from "../types/todo";
+import { useI18n } from "../i18n/I18nContext";
 
 type HomeScreenProps = {
   todosApi: UseTodosResult;
@@ -14,8 +15,13 @@ type HomeScreenProps = {
   onOpenTodo: (todo: Todo) => void;
 };
 
-export function HomeScreen({ todosApi, onOpenCreateTodo, onOpenTodo, }: HomeScreenProps) {
+export function HomeScreen({
+  todosApi,
+  onOpenCreateTodo,
+  onOpenTodo,
+}: HomeScreenProps) {
   const { colors } = useTheme();
+  const { t } = useI18n();
   const styles = createStyles(colors);
 
   const { dailyDopamineGoal, dopaminePointsPerTodo } = useAppSettings();
@@ -33,31 +39,34 @@ export function HomeScreen({ todosApi, onOpenCreateTodo, onOpenTodo, }: HomeScre
         <View>
           <View style={styles.header}>
             <BrandText size={42} />
-            <Text style={styles.subtitle}>Mach kleine Aufgaben sichtbar.</Text>
+            <Text style={styles.subtitle}>{t("home.subtitle")}</Text>
           </View>
 
           <DopamineBar points={dopaminePoints} goal={dailyDopamineGoal} />
 
           <Pressable style={styles.createButton} onPress={onOpenCreateTodo}>
-            <Text style={styles.createButtonText}>+ Neue Todo erstellen</Text>
+            <Text style={styles.createButtonText}>{t("home.createTodo")}</Text>
           </Pressable>
 
           <View style={styles.progressCard}>
             <Text style={styles.progressText}>
-              {todosApi.completedTodayTodos} von {todosApi.todayTodos.length} heute erledigt
+              {t("home.progress", {
+                completed: todosApi.completedTodayTodos,
+                total: todosApi.todayTodos.length,
+              })}
             </Text>
           </View>
 
-          <Text style={styles.todayTitle}>Heute</Text>
+          <Text style={styles.todayTitle}>{t("home.today")}</Text>
 
           {todosApi.isLoading && (
-            <Text style={styles.emptyText}>Lade Todos...</Text>
+            <Text style={styles.emptyText}>{t("home.loading")}</Text>
           )}
         </View>
       }
       ListEmptyComponent={
         !todosApi.isLoading ? (
-          <Text style={styles.emptyText}>Noch keine Aufgaben für heute.</Text>
+          <Text style={styles.emptyText}>{t("home.empty")}</Text>
         ) : null
       }
       renderItem={({ item }) => (

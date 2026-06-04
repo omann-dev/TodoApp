@@ -1,6 +1,7 @@
 import { StyleSheet, Text, View } from "react-native";
 import { useTheme } from "../theme/ThemeContext";
 import { ThemeColors } from "../theme/theme";
+import { useI18n } from "../i18n/I18nContext";
 
 type DopamineBarProps = {
   points: number;
@@ -9,6 +10,7 @@ type DopamineBarProps = {
 
 export function DopamineBar({ points, goal }: DopamineBarProps) {
   const { colors } = useTheme();
+  const { t } = useI18n();
   const styles = createStyles(colors);
 
   const progress = goal === 0 ? 0 : Math.min(points / goal, 1);
@@ -19,15 +21,15 @@ export function DopamineBar({ points, goal }: DopamineBarProps) {
     <View style={styles.card}>
       <View style={styles.headerRow}>
         <View>
-          <Text style={styles.label}>Tägliche Dopamin-Dosis</Text>
+          <Text style={styles.label}>{t("dopamine.label")}</Text>
           <Text style={styles.subtitle}>
-            {points} / {goal} DP gesammelt
+            {t("dopamine.subtitle", { points, goal })}
           </Text>
         </View>
 
         <View style={[styles.badge, isCompleted && styles.badgeCompleted]}>
           <Text style={styles.badgeText}>
-            {isCompleted ? "VOLL" : `${progressPercent}%`}
+            {isCompleted ? t("dopamine.full") : `${progressPercent}%`}
           </Text>
         </View>
       </View>
@@ -37,9 +39,7 @@ export function DopamineBar({ points, goal }: DopamineBarProps) {
       </View>
 
       <Text style={styles.footerText}>
-        {isCompleted
-          ? "Dosis erreicht. Stark gemacht."
-          : "Hake Todos ab, um deine Leiste zu füllen."}
+        {isCompleted ? t("dopamine.completed") : t("dopamine.open")}
       </Text>
     </View>
   );
