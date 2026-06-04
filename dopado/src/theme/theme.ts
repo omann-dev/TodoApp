@@ -23,43 +23,45 @@ export type ThemeColors = {
 
 export const themes: Record<ThemeName, ThemeColors> = {
   dark: {
-    background: "#001F2F",
-    surface: "#003049",
-    surfaceLight: "#0A405E",
+    // Russian Palette inspired
+    background: "#303952",     // Biscay
+    surface: "#3A435F",
+    surfaceLight: "#596275",   // Pencil Lead
 
-    primary: "#F77F00",
-    primaryDark: "#C86400",
-    secondary: "#FCBF49",
-    accent: "#EAE2B7",
-    reward: "#FCBF49",
-    success: "#F77F00",
+    primary: "#546DE5",        // Cornflower
+    primaryDark: "#574B90",    // Purple Corallite
+    secondary: "#3DC1D3",      // Blue Curacao
+    accent: "#778BEB",         // Soft Blue
+    reward: "#F5CD79",         // Summertime
+    success: "#63CDDA",        // Squeaky
 
-    text: "#FFF8E1",
-    textMuted: "#D8CFA5",
-    textDisabled: "#9E9270",
-    danger: "#D62828",
-    border: "#164761",
+    text: "#F7F1E3",
+    textMuted: "#D8D6D0",
+    textDisabled: "#A9A7A2",
+    danger: "#E66767",         // Porcelain Rose
+    border: "#4A526B",
 
     statusBarStyle: "light",
   },
 
   light: {
-    background: "#EAE2B7",
-    surface: "#FFF8E1",
-    surfaceLight: "#F6D889",
+    // Russian Palette inspired
+    background: "#F7F1E3",
+    surface: "#FFFFFF",
+    surfaceLight: "#F7D794",   // Rosy Highlight
 
-    primary: "#003049",
-    primaryDark: "#001F2F",
-    secondary: "#F77F00",
-    accent: "#FCBF49",
-    reward: "#F77F00",
-    success: "#003049",
+    primary: "#546DE5",        // Cornflower
+    primaryDark: "#303952",    // Biscay
+    secondary: "#3DC1D3",      // Blue Curacao
+    accent: "#F8A5C2",         // Rogue Pink
+    reward: "#F5CD79",         // Summertime
+    success: "#63CDDA",        // Squeaky
 
-    text: "#003049",
-    textMuted: "#5E5A48",
-    textDisabled: "#9A9272",
-    danger: "#D62828",
-    border: "#D8CFA5",
+    text: "#303952",
+    textMuted: "#596275",
+    textDisabled: "#9CA0AD",
+    danger: "#C44569",         // Deep Rose
+    border: "#E7DCCB",
 
     statusBarStyle: "dark",
   },
