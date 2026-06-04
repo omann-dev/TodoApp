@@ -124,6 +124,8 @@ export const translations = {
 
     "todoCard.deleteTitle": "Todo löschen?",
     "todoCard.deleteMessage": "Diese Aufgabe wird aus deiner Ansicht entfernt.",
+
+    "reward.todoCompleted": "+{points} DP",
   },
 
   en: {
@@ -249,6 +251,8 @@ export const translations = {
 
     "todoCard.deleteTitle": "Delete todo?",
     "todoCard.deleteMessage": "This task will be removed from your view.",
+
+    "reward.todoCompleted": "+{points} DP",
   },
 } as const;
 

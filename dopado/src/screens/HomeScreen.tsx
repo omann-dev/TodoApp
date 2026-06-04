@@ -1,6 +1,15 @@
-import { FlatList, Pressable, StyleSheet, Text, View } from "react-native";
+import { useState } from "react";
+import {
+  FlatList,
+  Pressable,
+  StyleSheet,
+  Text,
+  View,
+  Vibration,
+} from "react-native";
 import { TodoCard } from "../components/TodoCard";
 import { DopamineBar } from "../components/DopamineBar";
+import { RewardToast } from "../components/RewardToast";
 import { UseTodosResult } from "../hooks/useTodos";
 import { useTheme } from "../theme/ThemeContext";
 import { ThemeColors } from "../theme/theme";
@@ -26,64 +35,92 @@ export function HomeScreen({
 
   const { dailyDopamineGoal, dopaminePointsPerTodo } = useAppSettings();
 
+  const [rewardTriggerId, setRewardTriggerId] = useState(0);
+
   const dopaminePoints = todosApi.completedTodayTodos * dopaminePointsPerTodo;
 
+  async function handleToggleTodo(todo: Todo) {
+    const wasAlreadyDone = todo.isDone;
+
+    await todosApi.toggleTodo(todo);
+
+    if (!wasAlreadyDone) {
+      Vibration.vibrate(35);
+      setRewardTriggerId((current) => current + 1);
+    }
+  }
+
   return (
-    <FlatList
-      style={styles.container}
-      data={todosApi.todayTodos}
-      keyExtractor={(item) => item.id}
-      showsVerticalScrollIndicator={false}
-      contentContainerStyle={styles.listContent}
-      ListHeaderComponent={
-        <View>
-          <View style={styles.header}>
-            <BrandText size={42} />
-            <Text style={styles.subtitle}>{t("home.subtitle")}</Text>
+    <View style={styles.container}>
+      <RewardToast
+        triggerId={rewardTriggerId}
+        label={t("reward.todoCompleted", {
+          points: dopaminePointsPerTodo,
+        })}
+      />
+
+      <FlatList
+        style={styles.list}
+        data={todosApi.todayTodos}
+        keyExtractor={(item) => item.id}
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.listContent}
+        ListHeaderComponent={
+          <View>
+            <View style={styles.header}>
+              <BrandText size={42} />
+              <Text style={styles.subtitle}>{t("home.subtitle")}</Text>
+            </View>
+
+            <DopamineBar points={dopaminePoints} goal={dailyDopamineGoal} />
+
+            <Pressable style={styles.createButton} onPress={onOpenCreateTodo}>
+              <Text style={styles.createButtonText}>
+                {t("home.createTodo")}
+              </Text>
+            </Pressable>
+
+            <View style={styles.progressCard}>
+              <Text style={styles.progressText}>
+                {t("home.progress", {
+                  completed: todosApi.completedTodayTodos,
+                  total: todosApi.todayTodos.length,
+                })}
+              </Text>
+            </View>
+
+            <Text style={styles.todayTitle}>{t("home.today")}</Text>
+
+            {todosApi.isLoading && (
+              <Text style={styles.emptyText}>{t("home.loading")}</Text>
+            )}
           </View>
-
-          <DopamineBar points={dopaminePoints} goal={dailyDopamineGoal} />
-
-          <Pressable style={styles.createButton} onPress={onOpenCreateTodo}>
-            <Text style={styles.createButtonText}>{t("home.createTodo")}</Text>
-          </Pressable>
-
-          <View style={styles.progressCard}>
-            <Text style={styles.progressText}>
-              {t("home.progress", {
-                completed: todosApi.completedTodayTodos,
-                total: todosApi.todayTodos.length,
-              })}
-            </Text>
-          </View>
-
-          <Text style={styles.todayTitle}>{t("home.today")}</Text>
-
-          {todosApi.isLoading && (
-            <Text style={styles.emptyText}>{t("home.loading")}</Text>
-          )}
-        </View>
-      }
-      ListEmptyComponent={
-        !todosApi.isLoading ? (
-          <Text style={styles.emptyText}>{t("home.empty")}</Text>
-        ) : null
-      }
-      renderItem={({ item }) => (
-        <TodoCard
-          todo={item}
-          onToggle={todosApi.toggleTodo}
-          onDelete={todosApi.deleteTodo}
-          onOpen={onOpenTodo}
-        />
-      )}
-    />
+        }
+        ListEmptyComponent={
+          !todosApi.isLoading ? (
+            <Text style={styles.emptyText}>{t("home.empty")}</Text>
+          ) : null
+        }
+        renderItem={({ item }) => (
+          <TodoCard
+            todo={item}
+            onToggle={handleToggleTodo}
+            onDelete={todosApi.deleteTodo}
+            onOpen={onOpenTodo}
+          />
+        )}
+      />
+    </View>
   );
 }
 
 function createStyles(colors: ThemeColors) {
   return StyleSheet.create({
     container: {
+      flex: 1,
+      backgroundColor: colors.background,
+    },
+    list: {
       flex: 1,
       backgroundColor: colors.background,
     },
