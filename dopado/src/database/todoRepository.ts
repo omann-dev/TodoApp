@@ -1,5 +1,5 @@
 import { getDatabase } from "./database";
-import { Todo } from "../types/todo";
+import { CreateTodoInput, Todo } from "../types/todo";
 import { getCurrentTimestamp, getTodayDateKey } from "../services/dateService";
 
 type TodoRow = {
@@ -11,6 +11,9 @@ type TodoRow = {
   completedAt: string | null;
   deletedAt: string | null;
   isDone: number;
+  categoryId: string | null;
+  categoryName: string | null;
+  categoryColor: string | null;
 };
 
 function mapRowToTodo(row: TodoRow): Todo {
@@ -23,23 +26,29 @@ function mapRowToTodo(row: TodoRow): Todo {
     completedAt: row.completedAt,
     deletedAt: row.deletedAt,
     isDone: row.isDone === 1,
+    categoryId: row.categoryId,
+    categoryName: row.categoryName,
+    categoryColor: row.categoryColor,
   };
 }
 
-export async function createTodo(title: string, plannedFor?: string): Promise<Todo> {
+export async function createTodo(input: CreateTodoInput): Promise<Todo> {
   const db = await getDatabase();
 
   const now = getCurrentTimestamp();
 
   const todo: Todo = {
     id: `${Date.now()}-${Math.random().toString(36).slice(2)}`,
-    title,
-    description: null,
-    plannedFor: plannedFor ?? getTodayDateKey(),
+    title: input.title.trim(),
+    description: input.description?.trim() || null,
+    plannedFor: input.plannedFor ?? getTodayDateKey(),
     createdAt: now,
     completedAt: null,
     deletedAt: null,
     isDone: false,
+    categoryId: input.categoryId ?? null,
+    categoryName: null,
+    categoryColor: null,
   };
 
   await db.runAsync(
@@ -52,9 +61,10 @@ export async function createTodo(title: string, plannedFor?: string): Promise<To
       createdAt,
       completedAt,
       deletedAt,
-      isDone
+      isDone,
+      categoryId
     )
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?);
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);
     `,
     [
       todo.id,
@@ -65,6 +75,7 @@ export async function createTodo(title: string, plannedFor?: string): Promise<To
       todo.completedAt,
       todo.deletedAt,
       todo.isDone ? 1 : 0,
+      todo.categoryId,
     ]
   );
 
@@ -76,11 +87,25 @@ export async function getTodosForDay(dateKey: string): Promise<Todo[]> {
 
   const rows = await db.getAllAsync<TodoRow>(
     `
-    SELECT *
-    FROM todos
-    WHERE plannedFor = ?
-      AND deletedAt IS NULL
-    ORDER BY isDone ASC, createdAt DESC;
+    SELECT
+      t.id,
+      t.title,
+      t.description,
+      t.plannedFor,
+      t.createdAt,
+      t.completedAt,
+      t.deletedAt,
+      t.isDone,
+      t.categoryId,
+      c.name AS categoryName,
+      c.color AS categoryColor
+    FROM todos t
+    LEFT JOIN categories c
+      ON c.id = t.categoryId
+      AND c.deletedAt IS NULL
+    WHERE t.plannedFor = ?
+      AND t.deletedAt IS NULL
+    ORDER BY t.isDone ASC, t.createdAt DESC;
     `,
     [dateKey]
   );
@@ -93,10 +118,24 @@ export async function getAllActiveTodos(): Promise<Todo[]> {
 
   const rows = await db.getAllAsync<TodoRow>(
     `
-    SELECT *
-    FROM todos
-    WHERE deletedAt IS NULL
-    ORDER BY plannedFor DESC, createdAt DESC;
+    SELECT
+      t.id,
+      t.title,
+      t.description,
+      t.plannedFor,
+      t.createdAt,
+      t.completedAt,
+      t.deletedAt,
+      t.isDone,
+      t.categoryId,
+      c.name AS categoryName,
+      c.color AS categoryColor
+    FROM todos t
+    LEFT JOIN categories c
+      ON c.id = t.categoryId
+      AND c.deletedAt IS NULL
+    WHERE t.deletedAt IS NULL
+    ORDER BY t.plannedFor DESC, t.createdAt DESC;
     `
   );
 

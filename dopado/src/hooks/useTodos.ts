@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { AppState } from "react-native";
-import { Todo } from "../types/todo";
+import { CreateTodoInput, Todo } from "../types/todo";
 import { runMigrations } from "../database/migrations";
 import {
   createTodo,
@@ -52,15 +52,20 @@ export function useTodos() {
     }
   }, [refreshTodos]);
 
-  async function addTodo(title: string, plannedFor?: string) {
-    const trimmedTitle = title.trim();
+  async function addTodo(input: CreateTodoInput) {
+    const trimmedTitle = input.title.trim();
 
     if (trimmedTitle.length === 0) {
       return;
     }
 
     await ensureDatabaseIsReady();
-    await createTodo(trimmedTitle, plannedFor);
+
+    await createTodo({
+      ...input,
+      title: trimmedTitle,
+    });
+
     await refreshTodos();
   }
 

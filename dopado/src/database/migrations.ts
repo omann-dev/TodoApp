@@ -1,5 +1,9 @@
 import { getDatabase } from "./database";
 
+type TableColumn = {
+  name: string;
+};
+
 export async function runMigrations(): Promise<void> {
   const db = await getDatabase();
 
@@ -21,5 +25,27 @@ export async function runMigrations(): Promise<void> {
       key TEXT PRIMARY KEY NOT NULL,
       value TEXT NOT NULL
     );
+
+    CREATE TABLE IF NOT EXISTS categories (
+      id TEXT PRIMARY KEY NOT NULL,
+      name TEXT NOT NULL,
+      color TEXT NOT NULL,
+      createdAt TEXT NOT NULL,
+      deletedAt TEXT
+    );
   `);
+
+  const todoColumns = await db.getAllAsync<TableColumn>(`
+    PRAGMA table_info(todos);
+  `);
+
+  const hasCategoryIdColumn = todoColumns.some(
+    (column) => column.name === "categoryId"
+  );
+
+  if (!hasCategoryIdColumn) {
+    await db.execAsync(`
+      ALTER TABLE todos ADD COLUMN categoryId TEXT;
+    `);
+  }
 }

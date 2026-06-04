@@ -7,6 +7,7 @@ import { CalendarDayDetailScreen } from "./src/screens/CalendarDayDetailScreen";
 import { StatsScreen } from "./src/screens/StatsScreen";
 import { SettingsScreen } from "./src/screens/SettingsScreen";
 import { StartupScreen } from "./src/screens/StartupScreen";
+import { CreateTodoScreen } from "./src/screens/CreateTodoScreen";
 import { useTodos } from "./src/hooks/useTodos";
 import { ThemeProvider, useTheme } from "./src/theme/ThemeContext";
 import { ThemeColors } from "./src/theme/theme";
@@ -16,7 +17,11 @@ import {
 } from "./src/settings/AppSettingsContext";
 
 type MainScreen = "home" | "calendar" | "stats";
-type ActiveScreen = MainScreen | "settings" | "calendarDayDetail";
+type ActiveScreen =
+  | MainScreen
+  | "settings"
+  | "calendarDayDetail"
+  | "createTodo";
 
 const STARTUP_SCREEN_DURATION_IN_MS = 2200;
 
@@ -36,7 +41,6 @@ function AppContent() {
   const [selectedCalendarDate, setSelectedCalendarDate] = useState<string | null>(
     null
   );
-
   const [hasStartupTimePassed, setHasStartupTimePassed] = useState(false);
 
   const todosApi = useTodos();
@@ -86,6 +90,19 @@ function AppContent() {
     setActiveScreen(screen);
   }
 
+  function openCreateTodo() {
+    setLastMainScreen("home");
+    setActiveScreen("createTodo");
+  }
+
+  function closeCreateTodo() {
+    setActiveScreen("home");
+  }
+
+  function handleTodoCreated() {
+    setActiveScreen("home");
+  }
+
   function openCalendarDay(dateKey: string) {
     setSelectedCalendarDate(dateKey);
     setActiveScreen("calendarDayDetail");
@@ -97,7 +114,9 @@ function AppContent() {
   }
 
   const shouldShowSettingsButton =
-    activeScreen !== "settings" && activeScreen !== "calendarDayDetail";
+    activeScreen !== "settings" &&
+    activeScreen !== "calendarDayDetail" &&
+    activeScreen !== "createTodo";
 
   const shouldShowTabBar =
     activeScreen === "home" ||
@@ -115,7 +134,12 @@ function AppContent() {
       )}
 
       <View style={styles.screenContainer}>
-        {activeScreen === "home" && <HomeScreen todosApi={todosApi} />}
+        {activeScreen === "home" && (
+          <HomeScreen
+            todosApi={todosApi}
+            onOpenCreateTodo={openCreateTodo}
+          />
+        )}
 
         {activeScreen === "calendar" && (
           <CalendarScreen todosApi={todosApi} onOpenDay={openCalendarDay} />
@@ -125,6 +149,14 @@ function AppContent() {
 
         {activeScreen === "settings" && (
           <SettingsScreen onClose={closeSettings} />
+        )}
+
+        {activeScreen === "createTodo" && (
+          <CreateTodoScreen
+            todosApi={todosApi}
+            onBack={closeCreateTodo}
+            onCreated={handleTodoCreated}
+          />
         )}
 
         {activeScreen === "calendarDayDetail" && selectedCalendarDate && (
