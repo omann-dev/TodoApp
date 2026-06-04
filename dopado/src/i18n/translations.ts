@@ -118,6 +118,12 @@ export const translations = {
     "heatmap.selected": "{completed} Todos erledigt · {points} DP",
     "heatmap.goalReached": "Dopamin-Ziel erreicht",
     "heatmap.goalOpen": "Dopamin-Ziel noch offen",
+
+    "common.cancel": "Abbrechen",
+    "common.delete": "Löschen",
+
+    "todoCard.deleteTitle": "Todo löschen?",
+    "todoCard.deleteMessage": "Diese Aufgabe wird aus deiner Ansicht entfernt.",
   },
 
   en: {
@@ -237,6 +243,12 @@ export const translations = {
     "heatmap.selected": "{completed} todos completed · {points} DP",
     "heatmap.goalReached": "Dopamine goal reached",
     "heatmap.goalOpen": "Dopamine goal still open",
+
+    "common.cancel": "Cancel",
+    "common.delete": "Delete",
+
+    "todoCard.deleteTitle": "Delete todo?",
+    "todoCard.deleteMessage": "This task will be removed from your view.",
   },
 } as const;
 

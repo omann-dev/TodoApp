@@ -1,7 +1,8 @@
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { Alert, Pressable, StyleSheet, Text, View } from "react-native";
 import { Todo } from "../types/todo";
 import { useTheme } from "../theme/ThemeContext";
 import { ThemeColors } from "../theme/theme";
+import { useI18n } from "../i18n/I18nContext";
 
 type TodoCardProps = {
   todo: Todo;
@@ -12,6 +13,7 @@ type TodoCardProps = {
 
 export function TodoCard({ todo, onToggle, onDelete, onOpen }: TodoCardProps) {
   const { colors } = useTheme();
+  const { t } = useI18n();
   const styles = createStyles(colors);
 
   function handleContentPress() {
@@ -21,6 +23,27 @@ export function TodoCard({ todo, onToggle, onDelete, onOpen }: TodoCardProps) {
     }
 
     onToggle(todo);
+  }
+
+  function handleDeletePress() {
+    Alert.alert(
+      t("todoCard.deleteTitle"),
+      t("todoCard.deleteMessage"),
+      [
+        {
+          text: t("common.cancel"),
+          style: "cancel",
+        },
+        {
+          text: t("common.delete"),
+          style: "destructive",
+          onPress: () => onDelete(todo.id),
+        },
+      ],
+      {
+        cancelable: true,
+      }
+    );
   }
 
   return (
@@ -57,7 +80,7 @@ export function TodoCard({ todo, onToggle, onDelete, onOpen }: TodoCardProps) {
         )}
       </Pressable>
 
-      <Pressable style={styles.deleteButton} onPress={() => onDelete(todo.id)}>
+      <Pressable style={styles.deleteButton} onPress={handleDeletePress}>
         <Text style={styles.deleteText}>×</Text>
       </Pressable>
     </View>
