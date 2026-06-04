@@ -4,6 +4,7 @@ import { useTheme } from "../theme/ThemeContext";
 import { ThemeColors } from "../theme/theme";
 import { useAppSettings } from "../settings/AppSettingsContext";
 import { ActivityHeatmap } from "../components/ActivityHeatmap";
+import { StreakStatsCard } from "../components/StreakStatsCard";
 import { useI18n } from "../i18n/I18nContext";
 
 type StatsScreenProps = {
@@ -32,6 +33,12 @@ export function StatsScreen({ todosApi }: StatsScreenProps) {
       <Text style={styles.subtitle}>{t("stats.subtitle")}</Text>
 
       <ActivityHeatmap
+        todos={todosApi.allTodos}
+        dopaminePointsPerTodo={dopaminePointsPerTodo}
+        dailyDopamineGoal={dailyDopamineGoal}
+      />
+
+      <StreakStatsCard
         todos={todosApi.allTodos}
         dopaminePointsPerTodo={dopaminePointsPerTodo}
         dailyDopamineGoal={dailyDopamineGoal}

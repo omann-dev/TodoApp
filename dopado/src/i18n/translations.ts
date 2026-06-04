@@ -126,6 +126,16 @@ export const translations = {
     "todoCard.deleteMessage": "Diese Aufgabe wird aus deiner Ansicht entfernt.",
 
     "reward.todoCompleted": "+{points} DP",
+
+    "streak.title": "Streak",
+    "streak.subtitle": "Wie konstant du deine Tagesziele erreichst.",
+    "streak.current": "Aktuelle Streak",
+    "streak.best": "Beste Streak",
+    "streak.week": "Diese Woche",
+    "streak.days": "{count} Tage",
+    "streak.weekValue": "{count}/7 Ziele",
+    "streak.activeMessage": "Deine Flamme brennt.",
+    "streak.inactiveMessage": "Erreiche heute dein Ziel und starte deine Streak.",
   },
 
   en: {
@@ -253,6 +263,16 @@ export const translations = {
     "todoCard.deleteMessage": "This task will be removed from your view.",
 
     "reward.todoCompleted": "+{points} DP",
+
+    "streak.title": "Streak",
+    "streak.subtitle": "How consistently you reach your daily goals.",
+    "streak.current": "Current streak",
+    "streak.best": "Best streak",
+    "streak.week": "This week",
+    "streak.days": "{count} days",
+    "streak.weekValue": "{count}/7 goals",
+    "streak.activeMessage": "Your flame is burning.",
+    "streak.inactiveMessage": "Reach today's goal to start your streak.",
   },
 } as const;
 

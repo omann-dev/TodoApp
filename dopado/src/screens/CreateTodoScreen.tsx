@@ -28,11 +28,22 @@ type CreateTodoScreenProps = {
 };
 
 const CATEGORY_COLORS = [
-  "#003049",
-  "#D62828",
-  "#F77F00",
-  "#FCBF49",
-  "#EAE2B7",
+  "#546DE5", // Blau
+  "#3DC1D3", // Cyan
+  "#63CDDA", // Hellcyan
+  "#574B90", // Lila
+  "#F5CD79", // Gelb
+  "#F7D794", // Warmes Gelb
+  "#F19066", // Orange
+  "#E66767", // Rot
+  "#C44569", // Pink/Deep Rose
+  "#F8A5C2", // Rosa
+  "#596275", // Grau-Blau
+  "#303952", // Dunkelblau
+  "#2ED573", // Grün
+  "#1E90FF", // Hellblau
+  "#FFA502", // Orange-Gelb
+  "#FF4757", // Rot
 ];
 
 export function CreateTodoScreen({
@@ -551,6 +562,7 @@ function createStyles(colors: ThemeColors) {
     },
     colorRow: {
       flexDirection: "row",
+      flexWrap: "wrap",
       gap: 10,
       marginBottom: 14,
     },
