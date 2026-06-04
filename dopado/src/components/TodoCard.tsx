@@ -7,11 +7,21 @@ type TodoCardProps = {
   todo: Todo;
   onToggle: (todo: Todo) => void;
   onDelete: (id: string) => void;
+  onOpen?: (todo: Todo) => void;
 };
 
-export function TodoCard({ todo, onToggle, onDelete }: TodoCardProps) {
+export function TodoCard({ todo, onToggle, onDelete, onOpen }: TodoCardProps) {
   const { colors } = useTheme();
   const styles = createStyles(colors);
+
+  function handleContentPress() {
+    if (onOpen) {
+      onOpen(todo);
+      return;
+    }
+
+    onToggle(todo);
+  }
 
   return (
     <View style={styles.card}>
@@ -22,10 +32,29 @@ export function TodoCard({ todo, onToggle, onDelete }: TodoCardProps) {
         {todo.isDone && <Text style={styles.checkmark}>✓</Text>}
       </Pressable>
 
-      <Pressable style={styles.content} onPress={() => onToggle(todo)}>
+      <Pressable style={styles.content} onPress={handleContentPress}>
         <Text style={[styles.title, todo.isDone && styles.titleDone]}>
           {todo.title}
         </Text>
+
+        {todo.description && todo.description.trim().length > 0 && (
+          <Text style={styles.descriptionPreview} numberOfLines={1}>
+            {todo.description}
+          </Text>
+        )}
+
+        {todo.categoryName && (
+          <View style={styles.categoryRow}>
+            <View
+              style={[
+                styles.categoryDot,
+                { backgroundColor: todo.categoryColor ?? colors.primary },
+              ]}
+            />
+
+            <Text style={styles.categoryText}>{todo.categoryName}</Text>
+          </View>
+        )}
       </Pressable>
 
       <Pressable style={styles.deleteButton} onPress={() => onDelete(todo.id)}>
@@ -63,7 +92,7 @@ function createStyles(colors: ThemeColors) {
     checkmark: {
       color: "#ffffff",
       fontSize: 18,
-      fontWeight: "800",
+      fontWeight: "900",
     },
     content: {
       flex: 1,
@@ -71,11 +100,33 @@ function createStyles(colors: ThemeColors) {
     title: {
       color: colors.text,
       fontSize: 16,
-      fontWeight: "600",
+      fontWeight: "800",
     },
     titleDone: {
       color: colors.textDisabled,
       textDecorationLine: "line-through",
+    },
+    descriptionPreview: {
+      color: colors.textMuted,
+      fontSize: 13,
+      marginTop: 4,
+      fontWeight: "600",
+    },
+    categoryRow: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 6,
+      marginTop: 7,
+    },
+    categoryDot: {
+      width: 8,
+      height: 8,
+      borderRadius: 999,
+    },
+    categoryText: {
+      color: colors.textMuted,
+      fontSize: 12,
+      fontWeight: "800",
     },
     deleteButton: {
       width: 32,
@@ -83,6 +134,7 @@ function createStyles(colors: ThemeColors) {
       borderRadius: 10,
       alignItems: "center",
       justifyContent: "center",
+      marginLeft: 8,
     },
     deleteText: {
       color: colors.textDisabled,

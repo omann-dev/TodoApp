@@ -11,6 +11,8 @@ import { CreateTodoScreen } from "./src/screens/CreateTodoScreen";
 import { useTodos } from "./src/hooks/useTodos";
 import { ThemeProvider, useTheme } from "./src/theme/ThemeContext";
 import { ThemeColors } from "./src/theme/theme";
+import { TodoDetailScreen } from "./src/screens/TodoDetailScreen";
+import { Todo } from "./src/types/todo";
 import {
   AppSettingsProvider,
   useAppSettings,
@@ -21,7 +23,8 @@ type ActiveScreen =
   | MainScreen
   | "settings"
   | "calendarDayDetail"
-  | "createTodo";
+  | "createTodo"
+  | "todoDetail";
 
 const STARTUP_SCREEN_DURATION_IN_MS = 2200;
 
@@ -42,6 +45,8 @@ function AppContent() {
     null
   );
   const [hasStartupTimePassed, setHasStartupTimePassed] = useState(false);
+
+  const [selectedTodoId, setSelectedTodoId] = useState<string | null>(null);
 
   const todosApi = useTodos();
   const { isSettingsLoading } = useAppSettings();
@@ -113,10 +118,21 @@ function AppContent() {
     setActiveScreen("calendar");
   }
 
+  function openTodoDetail(todo: Todo) {
+  setSelectedTodoId(todo.id);
+  setActiveScreen("todoDetail");
+  }
+
+  function closeTodoDetail() {
+    setSelectedTodoId(null);
+    setActiveScreen("home");
+  }
+
   const shouldShowSettingsButton =
     activeScreen !== "settings" &&
     activeScreen !== "calendarDayDetail" &&
-    activeScreen !== "createTodo";
+    activeScreen !== "createTodo" &&
+    activeScreen !== "todoDetail";
 
   const shouldShowTabBar =
     activeScreen === "home" ||
@@ -138,6 +154,7 @@ function AppContent() {
           <HomeScreen
             todosApi={todosApi}
             onOpenCreateTodo={openCreateTodo}
+            onOpenTodo={openTodoDetail}
           />
         )}
 
@@ -166,6 +183,14 @@ function AppContent() {
             onBack={closeCalendarDay}
           />
         )}
+
+        {activeScreen === "todoDetail" && selectedTodoId && (
+        <TodoDetailScreen
+          todoId={selectedTodoId}
+          todosApi={todosApi}
+          onBack={closeTodoDetail}
+        />
+      )}
       </View>
 
       {shouldShowTabBar && (

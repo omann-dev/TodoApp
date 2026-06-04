@@ -6,13 +6,15 @@ import { useTheme } from "../theme/ThemeContext";
 import { ThemeColors } from "../theme/theme";
 import { useAppSettings } from "../settings/AppSettingsContext";
 import { BrandText } from "../components/BrandText";
+import { Todo } from "../types/todo";
 
 type HomeScreenProps = {
   todosApi: UseTodosResult;
   onOpenCreateTodo: () => void;
+  onOpenTodo: (todo: Todo) => void;
 };
 
-export function HomeScreen({ todosApi, onOpenCreateTodo }: HomeScreenProps) {
+export function HomeScreen({ todosApi, onOpenCreateTodo, onOpenTodo, }: HomeScreenProps) {
   const { colors } = useTheme();
   const styles = createStyles(colors);
 
@@ -63,6 +65,7 @@ export function HomeScreen({ todosApi, onOpenCreateTodo }: HomeScreenProps) {
           todo={item}
           onToggle={todosApi.toggleTodo}
           onDelete={todosApi.deleteTodo}
+          onOpen={onOpenTodo}
         />
       )}
     />
