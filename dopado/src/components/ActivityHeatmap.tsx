@@ -1,8 +1,15 @@
 import { useMemo, useState } from "react";
-import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import {
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+  useWindowDimensions,
+} from "react-native";
 import { Todo } from "../types/todo";
 import { useTheme } from "../theme/ThemeContext";
-import { ThemeColors, ThemeName } from "../theme/theme";
+import { ThemeColors } from "../theme/theme";
 import { getTodayDateKey } from "../services/dateService";
 import { useI18n } from "../i18n/I18nContext";
 
@@ -19,7 +26,7 @@ type DayActivity = {
   goalReached: boolean;
 };
 
-const DAYS_TO_SHOW = 84;
+const DAYS_TO_SHOW = 98;
 
 export function ActivityHeatmap({
   todos,
@@ -29,6 +36,9 @@ export function ActivityHeatmap({
   const { colors, themeName } = useTheme();
   const { t, language } = useI18n();
   const styles = createStyles(colors);
+
+  const { width } = useWindowDimensions();
+  const heatmapLayout = getHeatmapLayout(width);
 
   const [selectedDateKey, setSelectedDateKey] = useState(getTodayDateKey());
 
@@ -59,7 +69,7 @@ export function ActivityHeatmap({
         contentContainerStyle={styles.gridScrollContent}
       >
         <View style={styles.gridWrapper}>
-          <View style={styles.dayLabels}>
+          <View style={[styles.dayLabels, { height: heatmapLayout.gridHeight }]}>
             <Text style={styles.dayLabel}>
               {language === "de" ? "Mo" : "Mon"}
             </Text>
@@ -73,9 +83,12 @@ export function ActivityHeatmap({
             </Text>
           </View>
 
-          <View style={styles.weeksContainer}>
+          <View style={[styles.weeksContainer, { gap: heatmapLayout.gap }]}>
             {weeks.map((week, weekIndex) => (
-              <View key={weekIndex} style={styles.weekColumn}>
+              <View
+                key={weekIndex}
+                style={[styles.weekColumn, { gap: heatmapLayout.gap }]}
+              >
                 {week.map((day) => {
                   const isSelected = day.dateKey === selectedDateKey;
 
@@ -85,6 +98,8 @@ export function ActivityHeatmap({
                       style={[
                         styles.dayCell,
                         {
+                          width: heatmapLayout.cellSize,
+                          height: heatmapLayout.cellSize,
                           backgroundColor: getActivityColor(
                             day,
                             dailyDopamineGoal,
@@ -145,24 +160,51 @@ export function ActivityHeatmap({
   );
 }
 
-function getHeatmapPalette(themeName: ThemeName): string[] {
+function getHeatmapPalette(themeName: "dark" | "light"): string[] {
   if (themeName === "dark") {
     return [
-      "#161B22", // keine Aktivität
-      "#0E4429", // wenig Aktivität
-      "#006D32", // mittel
-      "#26A641", // viel
-      "#39D353", // Ziel erreicht / sehr aktiv
+      "#161B22",
+      "#0E4429",
+      "#006D32",
+      "#26A641",
+      "#39D353",
     ];
   }
 
   return [
-    "#EBEDF0", // keine Aktivität
-    "#9BE9A8", // wenig Aktivität
-    "#40C463", // mittel
-    "#30A14E", // viel
-    "#216E39", // Ziel erreicht / sehr aktiv
+    "#EBEDF0",
+    "#9BE9A8",
+    "#40C463",
+    "#30A14E",
+    "#216E39",
   ];
+}
+
+function getHeatmapLayout(screenWidth: number) {
+  const screenHorizontalPadding = 40;
+  const cardHorizontalPadding = 32;
+  const dayLabelWidth = 24;
+  const availableWidth =
+    screenWidth -
+    screenHorizontalPadding -
+    cardHorizontalPadding -
+    dayLabelWidth;
+
+  const weeksToShow = Math.ceil(DAYS_TO_SHOW / 7);
+  const gap = 6;
+
+  const cellSize = Math.max(
+    14,
+    Math.floor((availableWidth - gap * (weeksToShow - 1)) / weeksToShow)
+  );
+
+  const gridHeight = cellSize * 7 + gap * 6;
+
+  return {
+    cellSize,
+    gap,
+    gridHeight,
+  };
 }
 
 function buildActivityDays(
@@ -296,7 +338,6 @@ function createStyles(colors: ThemeColors) {
       alignItems: "center",
     },
     dayLabels: {
-      height: 128,
       justifyContent: "space-around",
       marginRight: 8,
     },
@@ -307,14 +348,9 @@ function createStyles(colors: ThemeColors) {
     },
     weeksContainer: {
       flexDirection: "row",
-      gap: 5,
     },
-    weekColumn: {
-      gap: 5,
-    },
+    weekColumn: {},
     dayCell: {
-      width: 14,
-      height: 14,
       borderRadius: 4,
       borderWidth: 1,
       borderColor: "rgba(255, 255, 255, 0.12)",
