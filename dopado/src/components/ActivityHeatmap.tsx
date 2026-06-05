@@ -2,7 +2,7 @@ import { useMemo, useState } from "react";
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { Todo } from "../types/todo";
 import { useTheme } from "../theme/ThemeContext";
-import { ThemeColors } from "../theme/theme";
+import { ThemeColors, ThemeName } from "../theme/theme";
 import { getTodayDateKey } from "../services/dateService";
 import { useI18n } from "../i18n/I18nContext";
 
@@ -26,13 +26,13 @@ export function ActivityHeatmap({
   dopaminePointsPerTodo,
   dailyDopamineGoal,
 }: ActivityHeatmapProps) {
-  const { colors } = useTheme();
+  const { colors, themeName } = useTheme();
   const { t, language } = useI18n();
   const styles = createStyles(colors);
 
   const [selectedDateKey, setSelectedDateKey] = useState(getTodayDateKey());
 
-  const heatmapPalette = getHeatmapPalette(colors);
+  const heatmapPalette = getHeatmapPalette(themeName);
 
   const days = useMemo(() => {
     return buildActivityDays(todos, dopaminePointsPerTodo, dailyDopamineGoal);
@@ -63,9 +63,11 @@ export function ActivityHeatmap({
             <Text style={styles.dayLabel}>
               {language === "de" ? "Mo" : "Mon"}
             </Text>
+
             <Text style={styles.dayLabel}>
               {language === "de" ? "Mi" : "Wed"}
             </Text>
+
             <Text style={styles.dayLabel}>
               {language === "de" ? "Fr" : "Fri"}
             </Text>
@@ -143,14 +145,23 @@ export function ActivityHeatmap({
   );
 }
 
-function getHeatmapPalette(colors: ThemeColors): string[] {
+function getHeatmapPalette(themeName: ThemeName): string[] {
+  if (themeName === "dark") {
+    return [
+      "#161B22", // keine Aktivität
+      "#0E4429", // wenig Aktivität
+      "#006D32", // mittel
+      "#26A641", // viel
+      "#39D353", // Ziel erreicht / sehr aktiv
+    ];
+  }
+
   return [
-    colors.surfaceLight,
-    colors.primaryDark,
-    colors.primary,
-    colors.secondary,
-    colors.success,
-    colors.reward,
+    "#EBEDF0", // keine Aktivität
+    "#9BE9A8", // wenig Aktivität
+    "#40C463", // mittel
+    "#30A14E", // viel
+    "#216E39", // Ziel erreicht / sehr aktiv
   ];
 }
 
@@ -214,23 +225,19 @@ function getActivityColor(
   const progress =
     dailyDopamineGoal === 0 ? 0 : day.dopaminePoints / dailyDopamineGoal;
 
-  if (progress < 0.2) {
+  if (progress < 0.25) {
     return heatmapPalette[1];
   }
 
-  if (progress < 0.4) {
+  if (progress < 0.5) {
     return heatmapPalette[2];
   }
 
-  if (progress < 0.6) {
+  if (progress < 1) {
     return heatmapPalette[3];
   }
 
-  if (progress < 1) {
-    return heatmapPalette[4];
-  }
-
-  return heatmapPalette[5];
+  return heatmapPalette[4];
 }
 
 function getDateKeyFromTimestamp(timestamp: string): string {
