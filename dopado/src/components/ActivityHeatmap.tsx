@@ -17,6 +17,7 @@ type ActivityHeatmapProps = {
   todos: Todo[];
   dopaminePointsPerTodo: number;
   dailyDopamineGoal: number;
+  onOpenDay: (dateKey: string) => void;
 };
 
 type DayActivity = {
@@ -32,6 +33,7 @@ export function ActivityHeatmap({
   todos,
   dopaminePointsPerTodo,
   dailyDopamineGoal,
+  onOpenDay,
 }: ActivityHeatmapProps) {
   const { colors, themeName } = useTheme();
   const { t, language } = useI18n();
@@ -53,6 +55,11 @@ export function ActivityHeatmap({
   const selectedDay =
     days.find((day) => day.dateKey === selectedDateKey) ??
     days[days.length - 1];
+
+  function handleDayPress(dateKey: string) {
+    setSelectedDateKey(dateKey);
+    onOpenDay(dateKey);
+  }
 
   return (
     <View style={styles.card}>
@@ -108,7 +115,7 @@ export function ActivityHeatmap({
                         },
                         isSelected && styles.dayCellSelected,
                       ]}
-                      onPress={() => setSelectedDateKey(day.dateKey)}
+                      onPress={() => handleDayPress(day.dateKey)}
                     />
                   );
                 })}
@@ -162,28 +169,17 @@ export function ActivityHeatmap({
 
 function getHeatmapPalette(themeName: "dark" | "light"): string[] {
   if (themeName === "dark") {
-    return [
-      "#161B22",
-      "#0E4429",
-      "#006D32",
-      "#26A641",
-      "#39D353",
-    ];
+    return ["#161B22", "#0E4429", "#006D32", "#26A641", "#39D353"];
   }
 
-  return [
-    "#EBEDF0",
-    "#9BE9A8",
-    "#40C463",
-    "#30A14E",
-    "#216E39",
-  ];
+  return ["#EBEDF0", "#9BE9A8", "#40C463", "#30A14E", "#216E39"];
 }
 
 function getHeatmapLayout(screenWidth: number) {
   const screenHorizontalPadding = 40;
   const cardHorizontalPadding = 32;
   const dayLabelWidth = 24;
+
   const availableWidth =
     screenWidth -
     screenHorizontalPadding -

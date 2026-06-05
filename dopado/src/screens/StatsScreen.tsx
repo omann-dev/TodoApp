@@ -9,9 +9,10 @@ import { useI18n } from "../i18n/I18nContext";
 
 type StatsScreenProps = {
   todosApi: UseTodosResult;
+  onOpenDay: (dateKey: string) => void;
 };
 
-export function StatsScreen({ todosApi }: StatsScreenProps) {
+export function StatsScreen({ todosApi, onOpenDay }: StatsScreenProps) {
   const { colors } = useTheme();
   const { t } = useI18n();
   const styles = createStyles(colors);
@@ -36,6 +37,7 @@ export function StatsScreen({ todosApi }: StatsScreenProps) {
         todos={todosApi.allTodos}
         dopaminePointsPerTodo={dopaminePointsPerTodo}
         dailyDopamineGoal={dailyDopamineGoal}
+        onOpenDay={onOpenDay}
       />
 
       <StreakStatsCard

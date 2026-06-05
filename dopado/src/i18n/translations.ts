@@ -118,6 +118,8 @@ export const translations = {
     "heatmap.selected": "{completed} Todos erledigt · {points} DP",
     "heatmap.goalReached": "Dopamin-Ziel erreicht",
     "heatmap.goalOpen": "Dopamin-Ziel noch offen",
+    "heatmap.completedTasks": "Erledigte Todos",
+    "heatmap.noCompletedTasks": "An diesem Tag wurden keine Todos erledigt.",
 
     "common.cancel": "Abbrechen",
     "common.delete": "Löschen",
@@ -263,6 +265,8 @@ export const translations = {
     "heatmap.selected": "{completed} todos completed · {points} DP",
     "heatmap.goalReached": "Dopamine goal reached",
     "heatmap.goalOpen": "Dopamine goal still open",
+    "heatmap.completedTasks": "Completed todos",
+    "heatmap.noCompletedTasks": "No todos were completed on this day.",
 
     "common.cancel": "Cancel",
     "common.delete": "Delete",

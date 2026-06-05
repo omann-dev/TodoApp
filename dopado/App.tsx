@@ -50,6 +50,8 @@ function AppContent() {
   const [selectedCalendarDate, setSelectedCalendarDate] = useState<
     string | null
   >(null);
+  const [calendarDayReturnScreen, setCalendarDayReturnScreen] =
+    useState<MainScreen>("calendar");
   const [selectedTodoId, setSelectedTodoId] = useState<string | null>(null);
   const [hasStartupTimePassed, setHasStartupTimePassed] = useState(false);
 
@@ -145,14 +147,15 @@ function AppContent() {
     setActiveScreen("todoDetail");
   }
 
-  function openCalendarDay(dateKey: string) {
+  function openCalendarDay(dateKey: string, returnScreen: MainScreen) {
     setSelectedCalendarDate(dateKey);
+    setCalendarDayReturnScreen(returnScreen);
     setActiveScreen("calendarDayDetail");
   }
 
   function closeCalendarDay() {
     setSelectedCalendarDate(null);
-    setActiveScreen("calendar");
+    setActiveScreen(calendarDayReturnScreen);
   }
 
   const shouldShowSettingsButton =
@@ -187,10 +190,18 @@ function AppContent() {
         )}
 
         {activeScreen === "calendar" && (
-          <CalendarScreen todosApi={todosApi} onOpenDay={openCalendarDay} />
+          <CalendarScreen
+            todosApi={todosApi}
+            onOpenDay={(dateKey) => openCalendarDay(dateKey, "calendar")}
+          />
         )}
 
-        {activeScreen === "stats" && <StatsScreen todosApi={todosApi} />}
+        {activeScreen === "stats" && (
+          <StatsScreen
+            todosApi={todosApi}
+            onOpenDay={(dateKey) => openCalendarDay(dateKey, "stats")}
+          />
+        )}
 
         {activeScreen === "settings" && (
           <SettingsScreen onClose={closeSettings} />
