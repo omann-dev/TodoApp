@@ -32,6 +32,8 @@ export function ActivityHeatmap({
 
   const [selectedDateKey, setSelectedDateKey] = useState(getTodayDateKey());
 
+  const heatmapPalette = getHeatmapPalette(colors);
+
   const days = useMemo(() => {
     return buildActivityDays(todos, dopaminePointsPerTodo, dailyDopamineGoal);
   }, [todos, dopaminePointsPerTodo, dailyDopamineGoal]);
@@ -39,7 +41,8 @@ export function ActivityHeatmap({
   const weeks = useMemo(() => chunkIntoWeeks(days), [days]);
 
   const selectedDay =
-    days.find((day) => day.dateKey === selectedDateKey) ?? days[days.length - 1];
+    days.find((day) => day.dateKey === selectedDateKey) ??
+    days[days.length - 1];
 
   return (
     <View style={styles.card}>
@@ -57,9 +60,15 @@ export function ActivityHeatmap({
       >
         <View style={styles.gridWrapper}>
           <View style={styles.dayLabels}>
-            <Text style={styles.dayLabel}>{language === "de" ? "Mo" : "Mon"}</Text>
-            <Text style={styles.dayLabel}>{language === "de" ? "Mi" : "Wed"}</Text>
-            <Text style={styles.dayLabel}>{language === "de" ? "Fr" : "Fri"}</Text>
+            <Text style={styles.dayLabel}>
+              {language === "de" ? "Mo" : "Mon"}
+            </Text>
+            <Text style={styles.dayLabel}>
+              {language === "de" ? "Mi" : "Wed"}
+            </Text>
+            <Text style={styles.dayLabel}>
+              {language === "de" ? "Fr" : "Fri"}
+            </Text>
           </View>
 
           <View style={styles.weeksContainer}>
@@ -76,8 +85,8 @@ export function ActivityHeatmap({
                         {
                           backgroundColor: getActivityColor(
                             day,
-                            colors,
-                            dailyDopamineGoal
+                            dailyDopamineGoal,
+                            heatmapPalette
                           ),
                         },
                         isSelected && styles.dayCellSelected,
@@ -94,27 +103,14 @@ export function ActivityHeatmap({
 
       <View style={styles.legendRow}>
         <Text style={styles.legendText}>{t("heatmap.less")}</Text>
-        <View
-          style={[
-            styles.legendCell,
-            { backgroundColor: colors.surfaceLight },
-          ]}
-        />
-        <View
-          style={[
-            styles.legendCell,
-            { backgroundColor: colors.primaryDark },
-          ]}
-        />
-        <View
-          style={[styles.legendCell, { backgroundColor: colors.primary }]}
-        />
-        <View
-          style={[styles.legendCell, { backgroundColor: colors.reward }]}
-        />
-        <View
-          style={[styles.legendCell, { backgroundColor: colors.success }]}
-        />
+
+        {heatmapPalette.map((color, index) => (
+          <View
+            key={`${color}-${index}`}
+            style={[styles.legendCell, { backgroundColor: color }]}
+          />
+        ))}
+
         <Text style={styles.legendText}>{t("heatmap.more")}</Text>
       </View>
 
@@ -145,6 +141,17 @@ export function ActivityHeatmap({
       </View>
     </View>
   );
+}
+
+function getHeatmapPalette(colors: ThemeColors): string[] {
+  return [
+    colors.surfaceLight,
+    colors.primaryDark,
+    colors.primary,
+    colors.secondary,
+    colors.success,
+    colors.reward,
+  ];
 }
 
 function buildActivityDays(
@@ -197,29 +204,33 @@ function chunkIntoWeeks(days: DayActivity[]): DayActivity[][] {
 
 function getActivityColor(
   day: DayActivity,
-  colors: ThemeColors,
-  dailyDopamineGoal: number
+  dailyDopamineGoal: number,
+  heatmapPalette: string[]
 ): string {
   if (day.completedTodos === 0) {
-    return colors.surfaceLight;
-  }
-
-  if (day.goalReached) {
-    return colors.success;
+    return heatmapPalette[0];
   }
 
   const progress =
     dailyDopamineGoal === 0 ? 0 : day.dopaminePoints / dailyDopamineGoal;
 
-  if (progress < 0.34) {
-    return colors.primaryDark;
+  if (progress < 0.2) {
+    return heatmapPalette[1];
   }
 
-  if (progress < 0.67) {
-    return colors.primary;
+  if (progress < 0.4) {
+    return heatmapPalette[2];
   }
 
-  return colors.reward;
+  if (progress < 0.6) {
+    return heatmapPalette[3];
+  }
+
+  if (progress < 1) {
+    return heatmapPalette[4];
+  }
+
+  return heatmapPalette[5];
 }
 
 function getDateKeyFromTimestamp(timestamp: string): string {
@@ -299,7 +310,7 @@ function createStyles(colors: ThemeColors) {
       height: 14,
       borderRadius: 4,
       borderWidth: 1,
-      borderColor: colors.border,
+      borderColor: "rgba(255, 255, 255, 0.12)",
     },
     dayCellSelected: {
       borderColor: colors.text,
@@ -319,11 +330,11 @@ function createStyles(colors: ThemeColors) {
       fontWeight: "700",
     },
     legendCell: {
-      width: 12,
-      height: 12,
-      borderRadius: 3,
+      width: 13,
+      height: 13,
+      borderRadius: 4,
       borderWidth: 1,
-      borderColor: colors.border,
+      borderColor: "rgba(255, 255, 255, 0.12)",
     },
     selectedCard: {
       backgroundColor: colors.background,
