@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { AppState } from "react-native";
-import { CreateTodoInput, Todo } from "../types/todo";
+import { CreateTodoInput, Todo, UpdateTodoInput } from "../types/todo";
 import { runMigrations } from "../database/migrations";
 import {
   createTodo,
@@ -8,6 +8,7 @@ import {
   getTodosForDay,
   softDeleteTodo,
   toggleTodo as toggleTodoInDatabase,
+  updateTodo as updateTodoInDatabase,
 } from "../database/todoRepository";
 import { getTodayDateKey } from "../services/dateService";
 
@@ -81,6 +82,23 @@ export function useTodos() {
     await refreshTodos();
   }
 
+  async function updateTodo(input: UpdateTodoInput) {
+    const trimmedTitle = input.title.trim();
+
+    if (trimmedTitle.length === 0) {
+      return;
+    }
+
+    await ensureDatabaseIsReady();
+
+    await updateTodoInDatabase({
+      ...input,
+      title: trimmedTitle,
+    });
+
+    await refreshTodos();
+}
+
   useEffect(() => {
     void initializeTodos();
 
@@ -105,6 +123,7 @@ export function useTodos() {
     completedTodayTodos,
     completedAllTodos,
     addTodo,
+    updateTodo,
     toggleTodo,
     deleteTodo,
     refreshTodos,

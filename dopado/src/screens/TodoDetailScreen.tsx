@@ -10,12 +10,14 @@ type TodoDetailScreenProps = {
   todoId: string;
   todosApi: UseTodosResult;
   onBack: () => void;
+  onEdit: (todoId: string) => void;
 };
 
 export function TodoDetailScreen({
   todoId,
   todosApi,
   onBack,
+  onEdit,
 }: TodoDetailScreenProps) {
   const { colors } = useTheme();
   const { t, language } = useI18n();
@@ -88,6 +90,10 @@ export function TodoDetailScreen({
           </View>
         )}
       </View>
+
+      <Pressable style={styles.editButton} onPress={() => onEdit(todo.id)}>
+        <Text style={styles.editButtonText}>{t("todoDetail.edit")}</Text>
+      </Pressable>
 
       <View style={styles.infoCard}>
         <Text style={styles.sectionTitle}>{t("todoDetail.description")}</Text>
@@ -263,6 +269,18 @@ function createStyles(colors: ThemeColors) {
       color: colors.text,
       fontSize: 13,
       fontWeight: "800",
+    },
+    editButton: {
+      backgroundColor: colors.primary,
+      borderRadius: 18,
+      paddingVertical: 15,
+      alignItems: "center",
+      marginBottom: 16,
+    },
+    editButtonText: {
+      color: "#ffffff",
+      fontSize: 15,
+      fontWeight: "900",
     },
     infoCard: {
       backgroundColor: colors.surface,

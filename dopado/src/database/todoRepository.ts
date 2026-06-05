@@ -1,5 +1,5 @@
 import { getDatabase } from "./database";
-import { CreateTodoInput, Todo } from "../types/todo";
+import { CreateTodoInput, Todo, UpdateTodoInput } from "../types/todo";
 import { getCurrentTimestamp, getTodayDateKey } from "../services/dateService";
 
 type TodoRow = {
@@ -169,5 +169,28 @@ export async function softDeleteTodo(id: string): Promise<void> {
     WHERE id = ?;
     `,
     [getCurrentTimestamp(), id]
+  );
+}
+
+export async function updateTodo(input: UpdateTodoInput): Promise<void> {
+  const db = await getDatabase();
+
+  await db.runAsync(
+    `
+    UPDATE todos
+    SET title = ?,
+        description = ?,
+        plannedFor = ?,
+        categoryId = ?
+    WHERE id = ?
+      AND deletedAt IS NULL;
+    `,
+    [
+      input.title.trim(),
+      input.description?.trim() || null,
+      input.plannedFor,
+      input.categoryId ?? null,
+      input.id,
+    ]
   );
 }

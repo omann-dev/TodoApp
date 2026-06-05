@@ -19,3 +19,11 @@ export type CreateTodoInput = {
   plannedFor?: string;
   categoryId?: string | null;
 };
+
+export type UpdateTodoInput = {
+  id: string;
+  title: string;
+  description?: string | null;
+  plannedFor: string;
+  categoryId?: string | null;
+};

@@ -136,6 +136,14 @@ export const translations = {
     "streak.weekValue": "{count}/7 Ziele",
     "streak.activeMessage": "Deine Flamme brennt.",
     "streak.inactiveMessage": "Erreiche heute dein Ziel und starte deine Streak.",
+
+    "todoDetail.edit": "Bearbeiten",
+
+    "editTodo.title": "Todo bearbeiten",
+    "editTodo.subtitle": "Passe deine Aufgabe nachträglich an.",
+    "editTodo.save": "Änderungen speichern",
+    "editTodo.notFound": "Todo nicht gefunden",
+    "editTodo.notFoundDescription": "Diese Aufgabe existiert nicht mehr oder wurde gelöscht.",
   },
 
   en: {
@@ -273,6 +281,14 @@ export const translations = {
     "streak.weekValue": "{count}/7 goals",
     "streak.activeMessage": "Your flame is burning.",
     "streak.inactiveMessage": "Reach today's goal to start your streak.",
+
+    "todoDetail.edit": "Edit",
+
+    "editTodo.title": "Edit todo",
+    "editTodo.subtitle": "Update your task details.",
+    "editTodo.save": "Save changes",
+    "editTodo.notFound": "Todo not found",
+    "editTodo.notFoundDescription": "This task no longer exists or was deleted.",
   },
 } as const;
 

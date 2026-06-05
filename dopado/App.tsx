@@ -8,24 +8,27 @@ import { StatsScreen } from "./src/screens/StatsScreen";
 import { SettingsScreen } from "./src/screens/SettingsScreen";
 import { StartupScreen } from "./src/screens/StartupScreen";
 import { CreateTodoScreen } from "./src/screens/CreateTodoScreen";
+import { TodoDetailScreen } from "./src/screens/TodoDetailScreen";
+import { EditTodoScreen } from "./src/screens/EditTodoScreen";
 import { useTodos } from "./src/hooks/useTodos";
 import { ThemeProvider, useTheme } from "./src/theme/ThemeContext";
 import { ThemeColors } from "./src/theme/theme";
-import { TodoDetailScreen } from "./src/screens/TodoDetailScreen";
-import { Todo } from "./src/types/todo";
-import { I18nProvider, useI18n } from "./src/i18n/I18nContext";
 import {
   AppSettingsProvider,
   useAppSettings,
 } from "./src/settings/AppSettingsContext";
+import { I18nProvider, useI18n } from "./src/i18n/I18nContext";
+import { Todo } from "./src/types/todo";
 
 type MainScreen = "home" | "calendar" | "stats";
+
 type ActiveScreen =
   | MainScreen
   | "settings"
   | "calendarDayDetail"
   | "createTodo"
-  | "todoDetail";
+  | "todoDetail"
+  | "editTodo";
 
 const STARTUP_SCREEN_DURATION_IN_MS = 2200;
 
@@ -44,20 +47,18 @@ export default function App() {
 function AppContent() {
   const [activeScreen, setActiveScreen] = useState<ActiveScreen>("home");
   const [lastMainScreen, setLastMainScreen] = useState<MainScreen>("home");
-  const [selectedCalendarDate, setSelectedCalendarDate] = useState<string | null>(
-    null
-  );
-  const [hasStartupTimePassed, setHasStartupTimePassed] = useState(false);
-
+  const [selectedCalendarDate, setSelectedCalendarDate] = useState<
+    string | null
+  >(null);
   const [selectedTodoId, setSelectedTodoId] = useState<string | null>(null);
+  const [hasStartupTimePassed, setHasStartupTimePassed] = useState(false);
 
   const todosApi = useTodos();
   const { isSettingsLoading } = useAppSettings();
+  const { t, isLanguageLoading } = useI18n();
 
   const { colors } = useTheme();
   const styles = createStyles(colors);
-
-  const { t, isLanguageLoading } = useI18n();
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -68,10 +69,10 @@ function AppContent() {
   }, []);
 
   const shouldShowStartupScreen =
-  !hasStartupTimePassed ||
-  todosApi.isLoading ||
-  isSettingsLoading ||
-  isLanguageLoading;
+    !hasStartupTimePassed ||
+    todosApi.isLoading ||
+    isSettingsLoading ||
+    isLanguageLoading;
 
   if (shouldShowStartupScreen) {
     return (
@@ -116,6 +117,34 @@ function AppContent() {
     setActiveScreen("home");
   }
 
+  function openTodoDetail(todo: Todo) {
+    setSelectedTodoId(todo.id);
+    setActiveScreen("todoDetail");
+  }
+
+  function closeTodoDetail() {
+    setSelectedTodoId(null);
+    setActiveScreen("home");
+  }
+
+  function openEditTodo(todoId: string) {
+    setSelectedTodoId(todoId);
+    setActiveScreen("editTodo");
+  }
+
+  function closeEditTodo() {
+    if (selectedTodoId) {
+      setActiveScreen("todoDetail");
+      return;
+    }
+
+    setActiveScreen("home");
+  }
+
+  function handleTodoUpdated() {
+    setActiveScreen("todoDetail");
+  }
+
   function openCalendarDay(dateKey: string) {
     setSelectedCalendarDate(dateKey);
     setActiveScreen("calendarDayDetail");
@@ -126,21 +155,12 @@ function AppContent() {
     setActiveScreen("calendar");
   }
 
-  function openTodoDetail(todo: Todo) {
-  setSelectedTodoId(todo.id);
-  setActiveScreen("todoDetail");
-  }
-
-  function closeTodoDetail() {
-    setSelectedTodoId(null);
-    setActiveScreen("home");
-  }
-
   const shouldShowSettingsButton =
     activeScreen !== "settings" &&
     activeScreen !== "calendarDayDetail" &&
     activeScreen !== "createTodo" &&
-    activeScreen !== "todoDetail";
+    activeScreen !== "todoDetail" &&
+    activeScreen !== "editTodo";
 
   const shouldShowTabBar =
     activeScreen === "home" ||
@@ -184,6 +204,24 @@ function AppContent() {
           />
         )}
 
+        {activeScreen === "todoDetail" && selectedTodoId && (
+          <TodoDetailScreen
+            todoId={selectedTodoId}
+            todosApi={todosApi}
+            onBack={closeTodoDetail}
+            onEdit={openEditTodo}
+          />
+        )}
+
+        {activeScreen === "editTodo" && selectedTodoId && (
+          <EditTodoScreen
+            todoId={selectedTodoId}
+            todosApi={todosApi}
+            onBack={closeEditTodo}
+            onUpdated={handleTodoUpdated}
+          />
+        )}
+
         {activeScreen === "calendarDayDetail" && selectedCalendarDate && (
           <CalendarDayDetailScreen
             dateKey={selectedCalendarDate}
@@ -191,14 +229,6 @@ function AppContent() {
             onBack={closeCalendarDay}
           />
         )}
-
-        {activeScreen === "todoDetail" && selectedTodoId && (
-        <TodoDetailScreen
-          todoId={selectedTodoId}
-          todosApi={todosApi}
-          onBack={closeTodoDetail}
-        />
-      )}
       </View>
 
       {shouldShowTabBar && (
