@@ -179,18 +179,20 @@ function getHeatmapLayout(screenWidth: number) {
   const screenHorizontalPadding = 40;
   const cardHorizontalPadding = 32;
   const dayLabelWidth = 24;
+  const safetyPadding = 18;
 
   const availableWidth =
     screenWidth -
     screenHorizontalPadding -
     cardHorizontalPadding -
-    dayLabelWidth;
+    dayLabelWidth -
+    safetyPadding;
 
   const weeksToShow = Math.ceil(DAYS_TO_SHOW / 7);
-  const gap = 6;
+  const gap = 5;
 
   const cellSize = Math.max(
-    14,
+    13,
     Math.floor((availableWidth - gap * (weeksToShow - 1)) / weeksToShow)
   );
 
