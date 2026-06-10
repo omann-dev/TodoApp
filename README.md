@@ -70,3 +70,4 @@ Completed tasks generate dopamine points, fill a daily progress bar and contribu
 ## Status
 
 This project is currently in active development.
+
